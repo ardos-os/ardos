@@ -1,3 +1,3 @@
 [submodule "packages/ardos-packer"]
 	path = packages/ardos-packer
-	url = https://github.com/ardos/ardos-packer
+	url = https://github.com/ardos-os/ardos-packer
