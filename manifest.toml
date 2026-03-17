@@ -32,3 +32,44 @@ SQUASHFS="y"
 SQUASHFS_ZSTD="y"
 SQUASHFS_COMPILE_DECOMP_SINGLE="n"
 SQUASHFS_COMPILE_DECOMP_MULTI_PERCPU="y"
+
+[[package]]
+name = "glibc-ardos"
+version = "2.41"
+[package.source]
+mode = "pkgbuildlocal"
+path = "packages/glibc"
+
+
+[[package]]
+name = "llvm-mesa"
+version = "22.1.1"
+[package.source]
+mode = "pkgbuildlocal"
+path = "packages/llvm-mesa" 
+
+[[package]]
+name = "libgcc"
+version = "15.2.1+r604+g0b99615a8aef"
+[package.source]
+mode = "binary"
+url = "https://mirror.moson.org/arch/core/os/x86_64/libgcc-15.2.1+r604+g0b99615a8aef-1-x86_64.pkg.tar.zst"
+sha256 = "00EBC06EF4B8FF5C1FD7BD7B6FAAFDC7C3BFA7F1F3A170FF2F2025D1F0B62ACE"
+[[package]]
+name = "libstdc++"
+version = "15.2.1+r604+g0b99615a8aef"
+[package.source]
+mode = "binary"
+url = "https://mirror.moson.org/arch/core/os/x86_64/libstdc++-15.2.1+r604+g0b99615a8aef-1-x86_64.pkg.tar.zst"
+sha256 = "73DC1B0000E915339759D9492BB30E93FF343E041D5D5601B2BEFDA12235EC78"
+
+[[package]]
+name = "mesa"
+version = "26.0.2"
+build_deps = ["llvm-mesa"]
+[package.source]
+mode = "pkgbuildlocal"
+path = "packages/mesa"
+pick_packages_from_group = ["mesa"]
+[package.docker]
+dockerfile_path = "packages/mesa/Dockerfile"

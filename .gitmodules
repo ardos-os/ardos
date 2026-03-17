@@ -1,3 +1,6 @@
 [submodule "packages/ardos-packer"]
 	path = packages/ardos-packer
 	url = https://github.com/ardos-os/ardos-packer
+[submodule "packages/glibc"]
+	path = packages/glibc
+	url = https://github.com/ardos-os/pkg-glibc

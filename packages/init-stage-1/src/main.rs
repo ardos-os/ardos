@@ -33,12 +33,38 @@ fn main() -> io::Result<()> {
 	// monta o loop device em /system
 	let system_root_path = mount_system_image(loop_device.path())?;
 	ls(&system_root_path)?;
-	std::thread::sleep(Duration::from_secs(5));
 
 	switch_root(system_root_path)?;
 	ls("/")?;
-	std::thread::sleep(Duration::from_secs(5));
+	println!("--- Ardos OS: GLIBC POST (Power On Self Test) ---");
 
+	// Testamos o próprio loader/libc como um executável.
+	// Se isso rodar, a fundação do sistema está operacional.
+	let glibc_path = CString::new("/usr/lib/libc.so.6").unwrap();
+	let arg0 = CString::new("libc_test").unwrap();
+	let args = [arg0.as_ptr(), std::ptr::null()];
+
+	unsafe {
+		// fork() se você quiser continuar o init depois, 
+		// ou apenas execv() se quiser que o teste seja a última coisa.
+		let pid = libc::fork();
+		if pid == 0 {
+			let res = libc::execv(glibc_path.as_ptr(), args.as_ptr());
+			if res == -1 {
+				let err = io::Error::last_os_error();
+				// Use epintln para garantir que sai no stderr
+				eprintln!("EXECV FAILED: {} (Code: {})", err, err.raw_os_error().unwrap_or(0));
+			}
+			// Se chegar aqui, falhou
+			libc::_exit(1);
+		} else {
+			let mut status = 0;
+			libc::waitpid(pid, &mut status, 0);
+			println!("GLIBC test finished with status: {}", status);
+		}
+	}
+	std::thread::sleep(Duration::from_secs(5));
+	
 	Ok(())
 }
 
@@ -87,7 +113,7 @@ fn mount_system_image(device: impl Into<PathBuf>) -> io::Result<PathBuf> {
 		device.as_os_str().to_str().unwrap(),
 		SYSTEM_PATH,
 		"squashfs",
-		MountFlags::RDONLY | MountFlags::NODEV | MountFlags::NOEXEC,
+		MountFlags::RDONLY | MountFlags::NODEV,
 	)?;
 	println!("✅ Mounted {} to {}", device.display(), SYSTEM_PATH);
 	Ok(PathBuf::from(SYSTEM_PATH))

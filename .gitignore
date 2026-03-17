@@ -2,3 +2,5 @@ build/
 
 .direnv
 packages/*/target/
+*.src.tar.xz
+packages/mesa/*.tar.*
