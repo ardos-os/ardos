@@ -2,7 +2,7 @@
 pkgname=llvm-mesa
 pkgver=22.1.1
 pkgrel=1
-pkgdesc="LLVM privado para o Mesa no Ardos OS"
+pkgdesc="LLVM privado mínimo para Mesa no Ardos OS"
 arch=('x86_64')
 url="https://llvm.org/"
 license=('Apache-2.0 WITH LLVM-exception')
@@ -22,7 +22,6 @@ prepare() {
 build() {
   cd llvm-project-$pkgver.src/llvm/build
 
-  # Forçando otimização de tamanho
   export CFLAGS="$CFLAGS -Os -g0"
   export CXXFLAGS="$CXXFLAGS -Os -g0"
 
@@ -35,11 +34,9 @@ build() {
     -DLLVM_LINK_LLVM_DYLIB=ON \
     -DLLVM_TARGETS_TO_BUILD="X86;AMDGPU" \
     -DLLVM_ENABLE_RTTI=ON \
-    -DLLVM_ENABLE_ZLIB=OFF \
-    -DLLVM_ENABLE_ZSTD=OFF \
-    -DLLVM_ENABLE_PROJECTS="" \
+    -DLLVM_ENABLE_PROJECTS="clang" \
     -DLLVM_INCLUDE_TESTS=OFF \
-    -DLLVM_INCLUDE_UTILS=ON \
+    -DLLVM_INCLUDE_UTILS=OFF \
     -DLLVM_ENABLE_TERMINFO=OFF \
     -DLLVM_ENABLE_LIBXML2=OFF \
     -DLLVM_ENABLE_CURL=OFF \
@@ -53,7 +50,10 @@ package() {
   cd llvm-project-$pkgver.src/llvm/build
   DESTDIR="$pkgdir" ninja install
 
-  # Removemos lixo (estáticas e arquivos de build do cmake)
+  # Removemos estáticas e arquivos de cmake
   find "$pkgdir"/usr/lib/llvm-mesa -name "*.a" -delete
   rm -rf "$pkgdir"/usr/lib/llvm-mesa/lib/cmake
+
+  # Removemos executáveis (clang, clang++, llvm-ar, etc)
+  rm -f "$pkgdir"/usr/lib/llvm-mesa/bin/*
 }

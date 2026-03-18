@@ -1,8 +1,7 @@
 pkgbase=mesa
 pkgname=(
   mesa
-  opencl-mesa
-  vulkan-asahi
+  #vulkan-asahi
   vulkan-broadcom
   vulkan-dzn
   vulkan-freedreno
@@ -17,12 +16,10 @@ pkgname=(
   vulkan-virtio
   vulkan-mesa-implicit-layers
   vulkan-mesa-layers
-  mesa-docs
 )
 pkgver=26.0.2
 _pkgver=${pkgver/[a-z]/-&}
 pkgrel=1
-epoch=1
 pkgdesc="Open-source OpenGL drivers"
 url="https://www.mesa3d.org/"
 arch=(x86_64)
@@ -75,6 +72,7 @@ makedepends=(
   # html-docs
   python-sphinx
   python-sphinx-hawkmoth
+  patchelf 
 )
 options=(
   # GCC 14 LTO causes segfault in LLVM under si_llvm_optimize_module
@@ -142,71 +140,125 @@ prepare() {
   # Include package release in version string so Chromium invalidates
   # its GPU cache; otherwise it can cause pages to render incorrectly.
   # https://bugs.launchpad.net/ubuntu/+source/chromium-browser/+bug/2020604
-  echo "$_pkgver-arch$epoch.$pkgrel" >VERSION
+  echo "$_pkgver-arch1.$pkgrel" >VERSION
 }
+patch_llvm_runtime() {
+    local dir="$1"
+    local llvm_dir="$2"
 
+    find "$dir" -type f \( -name "*.so*" -o -executable \) | while read -r file; do
+        file "$file" | grep -q ELF || continue
+
+        needed=$(readelf -d "$file" 2>/dev/null | grep "(NEEDED)" || true)
+        [[ -z "$needed" ]] && continue
+
+        patched=false
+
+        while read -r line; do
+            lib=$(echo "$line" | sed -n 's/.*\[\(.*\)\].*/\1/p')
+            [[ -z "$lib" ]] && continue
+
+            case "$lib" in
+                libLLVM.so.*)
+                    new="${lib}-mesa"
+                    ;;
+                libLTO.so*)
+                    new="${lib}-mesa"
+                    ;;
+                libRemarks.so*)
+                    new="${lib}-mesa"
+                    ;;
+                libclang*.so*)
+                    new="${lib}-mesa"
+                    ;;
+                *)
+                    continue
+                    ;;  
+            esac
+
+            if [[ -f "$llvm_dir/$new" ]]; then
+                echo "Patch: $file :: $lib → $new"
+                patchelf --replace-needed "$lib" "$new" "$file"
+                patched=true
+            else
+                echo "WARNING: $new não existe em $llvm_dir"
+            fi
+
+        done <<< "$needed"
+
+        if [[ "$patched" == true ]]; then
+            patchelf --set-rpath "$llvm_dir:\$ORIGIN" "$file"
+        fi
+    done
+}
 build() {
-    local meson_options=(
+  local meson_options=(
     -D b_ndebug=true
-    # --- PLATAFORMA ---
+
     -D platforms=wayland
     -D gbm=enabled
     -D egl=enabled
     -D glx=disabled
-    
-    # --- DRIVERS GALLIUM (OpenGL) ---
-    # iris: Intel moderna (Gen8+)
-    # crocus: Intel antiga (Gen4 a Gen7)
-    # radeonsi: AMD moderna
-    # r600: AMD antiga
-    # nouveau: NVIDIA (Open source)
-    # swrast: Software (CPU) - ESSENCIAL
-    -D gallium-drivers=iris,crocus,radeonsi,r600,nouveau,virgl,i915
-    
-    # --- DRIVERS VULKAN ---
-    # intel: Skylake+
-    # intel_hasvk: Ivy Bridge/Haswell
-    # amd: Radeon (RADV)
-    # nouveau: NVIDIA NVK
-    # swrast: Lavapipe (CPU)
-    -D vulkan-drivers=intel,intel_hasvk,amd,nouveau,virtio,swrast
 
-    # --- LLVM E COMPILAÇÃO ---
+    -D gallium-drivers=all
+
+    -D vulkan-drivers=all
+
     -D llvm=enabled
     -D shared-llvm=enabled
-    -D intel-rt=enabled # Ray Tracing para Intel
-    
-    # --- DESATIVAR CLC E DRIVERS MOBILE (Causa do seu erro) ---
-    -D gallium-rusticl=false
-    -D microsoft-clc=disabled
-    -D imagination-srv=false
-
-    # --- LIMPEZA DE DEPENDÊNCIAS ---
+    -D intel-rt=enabled
     -D android-libbacktrace=disabled
     -D gallium-mediafoundation=disabled
     -D libunwind=disabled
     -D sysprof=false
     -D valgrind=disabled
     -D html-docs=disabled
+    -D vulkan-layers=device-select,intel-nullhw,overlay,screenshot,anti-lag,vram-report-limit
     -D video-codecs=all
     -D xlib-lease=disabled
-  )
-  # Prefer the private LLVM instance built for Mesa
-  export LLVM_CONFIG=/usr/lib/llvm-mesa/bin/llvm-config
-  export PATH="/usr/lib/llvm-mesa/bin:$PATH"
-  export PKG_CONFIG_PATH="/usr/lib/llvm-mesa/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
-  [[ -x "$LLVM_CONFIG" ]] || { echo "error: llvm-mesa does not provide llvm-config at $LLVM_CONFIG" >&2; return 1; }
-  export LDFLAGS+=" -Wl,-rpath,/usr/lib/llvm-mesa/lib -Wl,-rpath-link,/usr/lib/llvm-mesa/lib"
 
-  # Build only minimal debug info to reduce size
+    -D gallium-rusticl-enable-drivers=asahi,freedreno,radeonsi
+    -D gallium-rusticl=true
+    -D vulkan-manifest-per-architecture=false
+
+
+  )
+
+  # --- TOOLCHAIN (use o clang/llvm do sistema para compilar os shaders) ---
+  # Assegura que Meson/mesa_clc veem o llvm/clang do sistema (toolchain),
+  # evitando que clang do sistema seja forçado a usar o llvm-mesa.
+  export LLVM_CONFIG="/usr/bin/llvm-config"
+  [[ -x "$LLVM_CONFIG" ]] || { echo "error: system llvm-config not found at $LLVM_CONFIG" >&2; return 1; }
+  export CC="/usr/bin/clang"
+  export CXX="/usr/bin/clang++"
+
+  # --- pkgconfig: dar prioridade ao llvm-mesa pkgconfig para flags de link quando existir ---
+  export PKG_CONFIG_PATH="/usr/lib/llvm-mesa/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+
+  # --- NÃO usar LD_PRELOAD nem sobrescrever PATH para llvm-mesa aqui ---
+  # LD_PRELOAD causa ODR/ABI collisions com clang do sistema -> double free.
+  # Removido: export PATH="/usr/lib/llvm-mesa/bin:$PATH"
+  # Removido: export LD_PRELOAD="/usr/lib/llvm-mesa/lib/libLLVM.so"
+
+  # Pedir ao linker que procure a runtime do llvm-mesa ao linkar bibliotecas finais.
+  # Não exportamos LD_LIBRARY_PATH para evitar que ferramentas de build (mesa_clc, clang)
+  # carreguem o llvm-mesa em execução — isto minimizará o risco de duas versões a serem
+  # carregadas no mesmo processo.
+  export LDFLAGS="-L/usr/lib/llvm-mesa/lib -Wl,-rpath,/usr/lib/llvm-mesa/lib $LDFLAGS"
+
+  # Minimize debug output/size durante build
   CFLAGS+=" -g1"
   CXXFLAGS+=" -g1"
 
-  # Inject subproject packages
+  # Meson package cache (igual ao teu fluxo)
   export MESON_PACKAGE_CACHE_DIR="$srcdir"
 
+  # Configure & build
   arch-meson mesa-$_pkgver build "${meson_options[@]}"
   meson compile -C build
+  
+  patch_llvm_runtime "build" "/usr/lib/llvm-mesa/lib"
+  # TODO: Patchar todos os .so pra usar as dlls do llvm em /usr/lib/llvm-mesa/lib/* usando patch_llvm_runtime
 }
 
 _pick() {
@@ -214,6 +266,7 @@ _pick() {
   for f; do
     d="$srcdir/$p/${f#$pkgdir/}"
     mkdir -p "$(dirname "$d")"
+    rm -rf "$d"
     mv -v "$f" "$d"
     rmdir -p --ignore-fail-on-non-empty "$(dirname "$f")"
   done
@@ -237,8 +290,8 @@ package_mesa() {
   )
   optdepends=("opengl-man-pages: for the OpenGL API man pages")
   provides=(
-    "libva-mesa-driver=$epoch:$pkgver-$pkgrel"
-    "mesa-libgl=$epoch:$pkgver-$pkgrel"
+    "libva-mesa-driver=1:$pkgver-$pkgrel"
+    "mesa-libgl=1:$pkgver-$pkgrel"
     libva-driver
     opengl-driver
   )
@@ -252,7 +305,6 @@ package_mesa() {
   )
 
   meson install -C build --destdir "$pkgdir" --no-rebuild
-
   (
     local libdir=usr/lib
 
@@ -292,64 +344,28 @@ package_mesa() {
 
 }
 
-package_opencl-mesa() {
-  pkgdesc="Open-source OpenCL drivers"
-  depends=(
-    clang
-    expat
-    glibc
-    libdrm
-    libelf
-    libgcc
-    libstdc++
-    llvm-mesa
-    spirv-llvm-translator
-    spirv-tools
-    zlib
-    zstd
+# package_vulkan-asahi() {
+#   pkgdesc="Open-source Vulkan driver for Apple GPUs"
+#   depends=(
+#     expat
+#     glibc
+#     libdisplay-info
+#     libdrm
+#     libgcc
+#     libstdc++
+#     spirv-tools
+#     systemd-libs
+#     vulkan-icd-loader
+#     vulkan-mesa-implicit-layers
+#     wayland
+#     zlib
+#     zstd
+#   )
+#   optdepends=("vulkan-mesa-layers: additional vulkan layers")
+#   provides=(vulkan-driver)
 
-    libclc # For /usr/share/clc/
-  )
-  optdepends=("opencl-headers: headers necessary for OpenCL development")
-  provides=(opencl-driver)
-  replaces=(
-    "opencl-clover-mesa<=1:25.0.5-1"
-    "opencl-rusticl-mesa<=1:25.0.5-1"
-  )
-  conflicts=(
-    opencl-clover-mesa
-    opencl-rusticl-mesa
-  )
-
-  mv opencl/* "$pkgdir"
-
-  install -Dm644 mesa-$_pkgver/docs/license.rst -t "$pkgdir/usr/share/licenses/$pkgname"
-}
-
-package_vulkan-asahi() {
-  pkgdesc="Open-source Vulkan driver for Apple GPUs"
-  depends=(
-    expat
-    glibc
-    libdisplay-info
-    libdrm
-    libgcc
-    libstdc++
-    spirv-tools
-    systemd-libs
-    vulkan-icd-loader
-    vulkan-mesa-implicit-layers
-    wayland
-    zlib
-    zstd
-  )
-  optdepends=("vulkan-mesa-layers: additional vulkan layers")
-  provides=(vulkan-driver)
-
-  mv vkasahi/* "$pkgdir"
-
-  install -Dm644 mesa-$_pkgver/docs/license.rst -t "$pkgdir/usr/share/licenses/$pkgname"
-}
+#   mv vkasahi/* "$pkgdir" || true
+# }
 
 package_vulkan-broadcom() {
   pkgdesc="Open-source Vulkan driver for VideoCore GPUs"
@@ -371,9 +387,7 @@ package_vulkan-broadcom() {
   optdepends=("vulkan-mesa-layers: additional vulkan layers")
   provides=(vulkan-driver)
 
-  mv vkbrcom/* "$pkgdir"
-
-  install -Dm644 mesa-$_pkgver/docs/license.rst -t "$pkgdir/usr/share/licenses/$pkgname"
+  mv vkbrcom/* "$pkgdir" || true
 }
 
 package_vulkan-dzn() {
@@ -396,9 +410,7 @@ package_vulkan-dzn() {
   optdepends=("vulkan-mesa-layers: additional vulkan layers")
   provides=(vulkan-driver)
 
-  mv vkd3d12/* "$pkgdir"
-
-  install -Dm644 mesa-$_pkgver/docs/license.rst -t "$pkgdir/usr/share/licenses/$pkgname"
+  mv vkd3d12/* "$pkgdir" || true
 }
 
 package_vulkan-freedreno() {
@@ -421,9 +433,7 @@ package_vulkan-freedreno() {
   optdepends=("vulkan-mesa-layers: additional vulkan layers")
   provides=(vulkan-driver)
 
-  mv vkfdreno/* "$pkgdir"
-
-  install -Dm644 mesa-$_pkgver/docs/license.rst -t "$pkgdir/usr/share/licenses/$pkgname"
+  mv vkfdreno/* "$pkgdir" || true
 }
 
 package_vulkan-gfxstream() {
@@ -443,9 +453,7 @@ package_vulkan-gfxstream() {
   optdepends=("vulkan-mesa-layers: additional vulkan layers")
   provides=(vulkan-driver)
 
-  mv vkgfxstr/* "$pkgdir"
-
-  install -Dm644 mesa-$_pkgver/docs/license.rst -t "$pkgdir/usr/share/licenses/$pkgname"
+  mv vkgfxstr/* "$pkgdir" || true
 }
 
 package_vulkan-intel() {
@@ -468,9 +476,7 @@ package_vulkan-intel() {
   optdepends=("vulkan-mesa-layers: additional vulkan layers")
   provides=(vulkan-driver)
 
-  mv vkintel/* "$pkgdir"
-
-  install -Dm644 mesa-$_pkgver/docs/license.rst -t "$pkgdir/usr/share/licenses/$pkgname"
+  mv vkintel/* "$pkgdir" || true
 }
 
 package_vulkan-kosmickrisp() {
@@ -493,9 +499,7 @@ package_vulkan-kosmickrisp() {
   optdepends=("vulkan-mesa-layers: additional vulkan layers")
   provides=(vulkan-driver)
 
-  mv vkkosmic/* "$pkgdir"
-
-  install -Dm644 mesa-$_pkgver/docs/license.rst -t "$pkgdir/usr/share/licenses/$pkgname"
+  mv vkkosmic/* "$pkgdir" || true
 }
 
 package_vulkan-nouveau() {
@@ -518,9 +522,7 @@ package_vulkan-nouveau() {
   optdepends=("vulkan-mesa-layers: additional vulkan layers")
   provides=(vulkan-driver)
 
-  mv vknvidia/* "$pkgdir"
-
-  install -Dm644 mesa-$_pkgver/docs/license.rst -t "$pkgdir/usr/share/licenses/$pkgname"
+  mv vknvidia/* "$pkgdir" || true
 }
 
 package_vulkan-panfrost() {
@@ -543,9 +545,7 @@ package_vulkan-panfrost() {
   optdepends=("vulkan-mesa-layers: additional vulkan layers")
   provides=(vulkan-driver)
 
-  mv vkpfrost/* "$pkgdir"
-
-  install -Dm644 mesa-$_pkgver/docs/license.rst -t "$pkgdir/usr/share/licenses/$pkgname"
+  mv vkpfrost/* "$pkgdir" || true
 }
 
 package_vulkan-powervr() {
@@ -568,9 +568,7 @@ package_vulkan-powervr() {
   optdepends=("vulkan-mesa-layers: additional vulkan layers")
   provides=(vulkan-driver)
 
-  mv vkpowrvr/* "$pkgdir"
-
-  install -Dm644 mesa-$_pkgver/docs/license.rst -t "$pkgdir/usr/share/licenses/$pkgname"
+  mv vkpowrvr/* "$pkgdir" || true
 }
 
 package_vulkan-radeon() {
@@ -596,9 +594,7 @@ package_vulkan-radeon() {
   provides=(vulkan-driver)
   replaces=('amdvlk<=2025.Q2.1-1')
 
-  mv vkradeon/* "$pkgdir"
-
-  install -Dm644 mesa-$_pkgver/docs/license.rst -t "$pkgdir/usr/share/licenses/$pkgname"
+  mv vkradeon/* "$pkgdir" || true
 }
 
 package_vulkan-swrast() {
@@ -624,9 +620,7 @@ package_vulkan-swrast() {
   replaces=(vulkan-mesa)
   provides=(vulkan-driver)
 
-  mv vkswrast/* "$pkgdir"
-
-  install -Dm644 mesa-$_pkgver/docs/license.rst -t "$pkgdir/usr/share/licenses/$pkgname"
+  mv vkswrast/* "$pkgdir" || true
 }
 
 package_vulkan-virtio() {
@@ -647,9 +641,7 @@ package_vulkan-virtio() {
   optdepends=("vulkan-mesa-layers: additional vulkan layers")
   provides=(vulkan-driver)
 
-  mv vkvirtio/* "$pkgdir"
-
-  install -Dm644 mesa-$_pkgver/docs/license.rst -t "$pkgdir/usr/share/licenses/$pkgname"
+  mv vkvirtio/* "$pkgdir" || true
 }
 
 package_vulkan-mesa-implicit-layers() {
@@ -662,9 +654,7 @@ package_vulkan-mesa-implicit-layers() {
   conflicts=(vulkan-mesa-device-select)
   replaces=(vulkan-mesa-device-select)
 
-  mv vkdevice/* "$pkgdir"
-
-  install -Dm644 mesa-$_pkgver/docs/license.rst -t "$pkgdir/usr/share/licenses/$pkgname"
+  mv vkdevice/* "$pkgdir" || true
 }
 
 package_vulkan-mesa-layers() {
@@ -681,14 +671,6 @@ package_vulkan-mesa-layers() {
   replaces=(vulkan-mesa-layer)
 
   mv vklayer/* "$pkgdir"
-
-  install -Dm644 mesa-$_pkgver/docs/license.rst -t "$pkgdir/usr/share/licenses/$pkgname"
-}
-
-package_mesa-docs() {
-  pkgdesc="Mesa's documentation"
-
-  mv docs/* "$pkgdir"
 
   install -Dm644 mesa-$_pkgver/docs/license.rst -t "$pkgdir/usr/share/licenses/$pkgname"
 }

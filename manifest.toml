@@ -70,6 +70,22 @@ build_deps = ["llvm-mesa"]
 [package.source]
 mode = "pkgbuildlocal"
 path = "packages/mesa"
-pick_packages_from_group = ["mesa"]
+pick_packages_from_group = [
+  "mesa",
+  "vulkan-broadcom",
+  "vulkan-dzn",
+  "vulkan-freedreno",
+  "vulkan-gfxstream",
+  "vulkan-intel",
+  "vulkan-kosmickrisp",
+  "vulkan-nouveau",
+  "vulkan-panfrost",
+  "vulkan-powervr",
+  "vulkan-radeon",
+  "vulkan-swrast",
+  "vulkan-virtio",
+  "vulkan-mesa-implicit-layers",
+  "vulkan-mesa-layers"
+]
 [package.docker]
 dockerfile_path = "packages/mesa/Dockerfile"

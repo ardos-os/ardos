@@ -37,6 +37,7 @@ RUN yes | pacman -Sy clang \
   python-yaml \
   rust-bindgen \
   wayland-protocols \
+  llvm \
  \
   libsysprof-capture \
   valgrind \
@@ -54,5 +55,4 @@ RUN yes | pacman -Sy clang \
     spirv-tools \
     wayland \
     zlib \
-    zstd
-
+    zstd patchelf
