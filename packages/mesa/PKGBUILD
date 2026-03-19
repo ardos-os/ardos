@@ -1,18 +1,11 @@
 pkgbase=mesa
 pkgname=(
   mesa
-  #vulkan-asahi
   vulkan-broadcom
   vulkan-dzn
-  vulkan-freedreno
-  vulkan-gfxstream
   vulkan-intel
-  vulkan-kosmickrisp
   vulkan-nouveau
-  vulkan-panfrost
-  vulkan-powervr
   vulkan-radeon
-  vulkan-swrast
   vulkan-virtio
   vulkan-mesa-implicit-layers
   vulkan-mesa-layers
@@ -413,48 +406,6 @@ package_vulkan-dzn() {
   mv vkd3d12/* "$pkgdir" || true
 }
 
-package_vulkan-freedreno() {
-  pkgdesc="Open-source Vulkan driver for Adreno GPUs"
-  depends=(
-    expat
-    glibc
-    libdisplay-info
-    libdrm
-    libgcc
-    libstdc++
-    spirv-tools
-    systemd-libs
-    vulkan-icd-loader
-    vulkan-mesa-implicit-layers
-    wayland
-    zlib
-    zstd
-  )
-  optdepends=("vulkan-mesa-layers: additional vulkan layers")
-  provides=(vulkan-driver)
-
-  mv vkfdreno/* "$pkgdir" || true
-}
-
-package_vulkan-gfxstream() {
-  pkgdesc="Open-source Vulkan driver for Graphics Streaming Kit"
-  depends=(
-    expat
-    glibc
-    libdisplay-info
-    libdrm
-    libgcc
-    libstdc++
-    systemd-libs
-    vulkan-icd-loader
-    vulkan-mesa-implicit-layers
-    wayland
-  )
-  optdepends=("vulkan-mesa-layers: additional vulkan layers")
-  provides=(vulkan-driver)
-
-  mv vkgfxstr/* "$pkgdir" || true
-}
 
 package_vulkan-intel() {
   pkgdesc="Open-source Vulkan driver for Intel GPUs"
@@ -479,29 +430,6 @@ package_vulkan-intel() {
   mv vkintel/* "$pkgdir" || true
 }
 
-package_vulkan-kosmickrisp() {
-  pkgdesc="Open-source Vulkan driver for Metal"
-  depends=(
-    expat
-    glibc
-    libdisplay-info
-    libdrm
-    libgcc
-    libstdc++
-    spirv-tools
-    systemd-libs
-    vulkan-icd-loader
-    vulkan-mesa-implicit-layers
-    wayland
-    zlib
-    zstd
-  )
-  optdepends=("vulkan-mesa-layers: additional vulkan layers")
-  provides=(vulkan-driver)
-
-  mv vkkosmic/* "$pkgdir" || true
-}
-
 package_vulkan-nouveau() {
   pkgdesc="Open-source Vulkan driver for Nvidia GPUs"
   depends=(
@@ -523,52 +451,6 @@ package_vulkan-nouveau() {
   provides=(vulkan-driver)
 
   mv vknvidia/* "$pkgdir" || true
-}
-
-package_vulkan-panfrost() {
-  pkgdesc="Open-source Vulkan driver for Mali GPUs"
-  depends=(
-    expat
-    glibc
-    libdisplay-info
-    libdrm
-    libgcc
-    libstdc++
-    spirv-tools
-    systemd-libs
-    vulkan-icd-loader
-    vulkan-mesa-implicit-layers
-    wayland
-    zlib
-    zstd
-  )
-  optdepends=("vulkan-mesa-layers: additional vulkan layers")
-  provides=(vulkan-driver)
-
-  mv vkpfrost/* "$pkgdir" || true
-}
-
-package_vulkan-powervr() {
-  pkgdesc="Open-source Vulkan driver for PowerVR GPUs"
-  depends=(
-    expat
-    glibc
-    libdisplay-info
-    libdrm
-    libgcc
-    libstdc++
-    spirv-tools
-    systemd-libs
-    vulkan-icd-loader
-    vulkan-mesa-implicit-layers
-    wayland
-    zlib
-    zstd
-  )
-  optdepends=("vulkan-mesa-layers: additional vulkan layers")
-  provides=(vulkan-driver)
-
-  mv vkpowrvr/* "$pkgdir" || true
 }
 
 package_vulkan-radeon() {
@@ -597,31 +479,6 @@ package_vulkan-radeon() {
   mv vkradeon/* "$pkgdir" || true
 }
 
-package_vulkan-swrast() {
-  pkgdesc="Open-source Vulkan driver for CPUs (Software Rasterizer)"
-  depends=(
-    expat
-    glibc
-    libdisplay-info
-    libdrm
-    libgcc
-    libstdc++
-    llvm-mesa
-    spirv-tools
-    systemd-libs
-    vulkan-icd-loader
-    vulkan-mesa-implicit-layers
-    wayland
-    zlib
-    zstd
-  )
-  optdepends=("vulkan-mesa-layers: additional vulkan layers")
-  conflicts=(vulkan-mesa)
-  replaces=(vulkan-mesa)
-  provides=(vulkan-driver)
-
-  mv vkswrast/* "$pkgdir" || true
-}
 
 package_vulkan-virtio() {
   pkgdesc="Open-source Vulkan driver for Virtio-GPU (Venus)"
