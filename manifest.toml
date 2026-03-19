@@ -93,7 +93,7 @@ mode ="binary"
 url = "https://mirror.moson.org/arch/extra/os/x86_64/spirv-tools-1:1.4.341.0-2-x86_64.pkg.tar.zst"
 sha256 = "4B1C76864DA8E14B7ED034FA77F6CACAE2F3D959AADC980E1F284C7E75387C2C"
 [[package]]
-name = "spirv-llvm"
+name = "spirv-llvm-translator"
 version ="22.1.0"
 build_deps = ["llvm-mesa", "spirv-tools"]
 [package.source]
