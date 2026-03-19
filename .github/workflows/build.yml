@@ -158,7 +158,6 @@ jobs:
           restore-keys: |
             build-image-${{ runner.os }}-
           key: build-image-${{ runner.os }}-${{ hashFiles('**/manifest.toml', '**/sysroot/**') }}
-      
 
       - name: Delete old images
         run: rm -rf build/images
@@ -166,7 +165,7 @@ jobs:
       - name: Build system image
         run: |
           chmod +x ./build-ardos/ardos-packer
-          ./build-ardos/ardos-packer image assemble || true   # continua mesmo se falhar
+          ./build-ardos/ardos-packer image assemble
 
       - name: Delete ardos-packer
         run: rm -f build/ardos-packer
