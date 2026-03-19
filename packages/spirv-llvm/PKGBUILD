@@ -1,0 +1,123 @@
+# Maintainer: Jan Alexander Steffens (heftig) <heftig@archlinux.org>
+# Maintainer: Daniel Bermond <dbermond@archlinux.org>
+# Maintainer: Bruno Pagani <archange@archlinux.org>
+
+pkgname=spirv-llvm-translator
+pkgver=22.1.0
+pkgrel=1
+pkgdesc="LLVM <-> SPIR-V converter for compilers targeting SPIR-V"
+url="https://www.khronos.org/spirv/"
+arch=(x86_64)
+license=(NCSA)
+depends=(
+  glibc
+  libstdc++
+  llvm-libs
+  spirv-tools
+)
+makedepends=(
+  cmake
+  patchelf
+  git
+  llvm
+  ninja
+  spirv-headers
+)
+source=(
+  git+https://github.com/KhronosGroup/SPIRV-LLVM-Translator#tag=v$pkgver
+)
+b2sums=('b467ac2128bfcff94b5a28c54c00ec2c562e7f167c90a822389b1850abcd78c2fb96153c837471fc3cb123ae6125ce1cb4088d7bbf2e91e052e35b1581eed2bd')
+
+prepare() {
+  cd SPIRV-LLVM-Translator
+
+  # Fix tests
+  # https://github.com/KhronosGroup/SPIRV-LLVM-Translator/pull/3301
+  # https://github.com/KhronosGroup/SPIRV-LLVM-Translator/issues/3580
+  git cherry-pick -n fc5873ee760c333738c9e8e8d8c2eb906f0c40f5
+  git cherry-pick -n 30258ee35493b5355a5c6df0655f91eff4217685
+}
+
+patch_llvm_runtime() {
+    local dir="$1"
+    local llvm_dir="$2"
+
+    find "$dir" -type f \( -name "*.so*" -o -executable \) | while read -r file; do
+        file "$file" | grep -q ELF || continue
+
+        needed=$(readelf -d "$file" 2>/dev/null | grep "(NEEDED)" || true)
+        [[ -z "$needed" ]] && continue
+
+        patched=false
+
+        while read -r line; do
+            lib=$(echo "$line" | sed -n 's/.*\[\(.*\)\].*/\1/p')
+            [[ -z "$lib" ]] && continue
+
+            case "$lib" in
+                libLLVM.so.*)
+                    new="${lib}-mesa"
+                    ;;
+                libLTO.so*)
+                    new="${lib}-mesa"
+                    ;;
+                libRemarks.so*)
+                    new="${lib}-mesa"
+                    ;;
+                libclang*.so*)
+                    new="${lib}-mesa"
+                    ;;
+                *)
+                    continue
+                    ;;  
+            esac    
+
+            if [[ -f "$llvm_dir/$new" ]]; then
+                echo "Patch: $file :: $lib → $new"
+                patchelf --replace-needed "$lib" "$new" "$file"
+                patched=true
+            else
+                echo "WARNING: $new não existe em $llvm_dir"
+            fi
+
+        done <<< "$needed"
+
+        if [[ "$patched" == true ]]; then
+            patchelf --set-rpath "$llvm_dir:\$ORIGIN" "$file"
+        fi
+    done
+}
+build() {
+  local cmake_options=(
+    -D BUILD_SHARED_LIBS=ON
+    -D CMAKE_BUILD_TYPE=Release
+    -D CMAKE_INSTALL_PREFIX=/usr
+    -D CMAKE_INSTALL_SYSCONFDIR=/etc
+    -D CMAKE_POSITION_INDEPENDENT_CODE=ON
+    -D CMAKE_SKIP_RPATH=ON
+    -D LLVM_CONFIG=llvm-config
+    -D LLVM_EXTERNAL_LIT=/usr/bin/lit
+    -D LLVM_EXTERNAL_SPIRV_HEADERS_SOURCE_DIR=/usr/include/spirv
+    -D LLVM_LIBDIR_SUFFIX=
+    -D LLVM_SPIRV_ENABLE_LIBSPIRV_DIS=ON
+    -D LLVM_SPIRV_INCLUDE_TESTS=ON
+    -W no-dev
+  )
+
+  cmake -S SPIRV-LLVM-Translator -B build -G Ninja "${cmake_options[@]}"
+  cd build
+  ninja
+  cd ..
+
+  patch_llvm_runtime "build" "/usr/lib/llvm-mesa/lib"
+}
+
+
+package() {
+  DESTDIR="$pkgdir" cmake --install build
+
+  install -Dm644 SPIRV-LLVM-Translator/LICENSE.TXT \
+    -t "$pkgdir/usr/share/licenses/$pkgname"
+}
+
+# vim:set sw=2 sts=-1 et:

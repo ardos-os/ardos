@@ -1,6 +1,8 @@
 build/
+build.*/
 
 .direnv
 packages/*/target/
 *.src.tar.xz
 packages/mesa/*.tar.*
+/packages/spirv-llvm/SPIRV-LLVM-Translator
