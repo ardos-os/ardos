@@ -136,7 +136,7 @@ jobs:
           path: build/
   build-image:
     name: Build System Image
-    runs-on: blacksmith-64vcpu-ubuntu-2404
+    runs-on: blacksmith-32vcpu-ubuntu-2404
     needs: [build-ardos-packer]
     steps:
       - uses: actions/checkout@v4
