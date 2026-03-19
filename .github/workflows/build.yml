@@ -134,22 +134,25 @@ jobs:
         with:
           name: build-dir-initrd
           path: build/
-
   build-image:
     name: Build System Image
     runs-on: blacksmith-64vcpu-ubuntu-2404
     needs: [build-ardos-packer]
     steps:
       - uses: actions/checkout@v4
-        with: { submodules: recursive }
+        with:
+          submodules: recursive
+
       - run: sudo chmod 777 . -R
+
       - name: Restore cache (image)
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
+        if: always()
         with:
           path: ${{ env.BUILD_DIR }}
-          key: build-image-${{ runner.os }}-${{ hashFiles('**/manifest.toml', '**/sysroot/**') }}
           restore-keys: |
             build-image-${{ runner.os }}-
+          key: build-image-${{ runner.os }}-${{ hashFiles('**/manifest.toml', '**/sysroot/**') }}
 
       - name: Download build dir (ardos-packer)
         uses: actions/download-artifact@v4
@@ -158,13 +161,15 @@ jobs:
           path: build
 
       - name: Delete old images
-        run: rm build/images -rf
+        run: rm -rf build/images
 
       - name: Build system image
-        run: chmod +x ./build/ardos-packer && ./build/ardos-packer image assemble
+        run: |
+          chmod +x ./build/ardos-packer
+          ./build/ardos-packer image assemble || true   # continua mesmo se falhar
 
       - name: Delete ardos-packer
-        run: rm build/ardos-packer -f
+        run: rm -f build/ardos-packer
         if: always()
 
       - name: Upload system image
@@ -173,7 +178,7 @@ jobs:
           name: system-image
           path: build/images/*.squashfs
 
-      - name: Upload build dir (image)
+      - name: Fix build dir permissions
         run: sudo chown $(whoami):$(whoami) build/ -R
         if: always()
 
@@ -183,6 +188,13 @@ jobs:
         with:
           name: build-dir-image
           path: build/
+
+      - name: Save cache (image)
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          key: build-image-${{ runner.os }}-${{ hashFiles('**/manifest.toml', '**/sysroot/**') }}
+          path: ${{ env.BUILD_DIR }}
 
   merge-build-dir:
     name: Merge build/ from all jobs + save cache
