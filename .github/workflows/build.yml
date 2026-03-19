@@ -12,7 +12,7 @@ env:
 jobs:
   build-ardos-packer:
     name: Build ardos-packer
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
         with: { submodules: recursive }
@@ -48,7 +48,7 @@ jobs:
 
   build-kernel:
     name: Build Kernel
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-16vcpu-ubuntu-2404
     needs: [build-ardos-packer]
     steps:
       - uses: actions/checkout@v4
@@ -96,7 +96,7 @@ jobs:
 
   build-initrd:
     name: Build Initrd
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     needs: [build-ardos-packer]
     steps:
       - uses: actions/checkout@v4
@@ -137,7 +137,7 @@ jobs:
 
   build-image:
     name: Build System Image
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-16vcpu-ubuntu-2404
     needs: [build-ardos-packer]
     steps:
       - uses: actions/checkout@v4
@@ -186,7 +186,7 @@ jobs:
 
   merge-build-dir:
     name: Merge build/ from all jobs + save cache
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     needs: [build-kernel, build-initrd, build-image]
     steps:
       - uses: actions/checkout@v4
