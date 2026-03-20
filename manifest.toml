@@ -1,6 +1,10 @@
 #:schema packages/ardos-packer/ardos-packer-schema.json
 
 version = "0.0.1-dev"
+
+[hooks]
+post-processing = "scripts/post-process-sysroot.sh"
+
 [initrd]
 build_script = "scripts/build-initramfs.sh"
 [kernel]
@@ -99,3 +103,85 @@ build_deps = ["llvm-mesa", "spirv-tools"]
 [package.source]
 mode = "pkgbuildlocal"
 path = "packages/spirv-llvm"
+[[package]]
+name = "zlib"
+version ="1.3.2"
+
+[package.source]
+mode = "binary"
+url ="https://umea.mirror.pkgbuild.com/core/os/x86_64/zlib-1:1.3.2-3-x86_64.pkg.tar.zst"
+sha256 = "41CF0BB5DF14E18F7FB868A97DA3FEB7C4127FBA99BB332AD54B14322FAAC1B1"
+
+
+[[package]]
+name = "xz"
+version ="5.8.2"
+[package.source]
+mode = "binary"
+url ="https://umea.mirror.pkgbuild.com/core/os/x86_64/xz-5.8.2-1-x86_64.pkg.tar.zst"
+sha256 = "23BCEA71064A929C76F95A324B68E6856A8880C6F70D525F4A83C391CA07B88A"
+
+[[package]]
+name = "lz4"
+version ="1.10.0"
+[package.source]
+mode = "binary"
+url = "https://umea.mirror.pkgbuild.com/core/os/x86_64/lz4-1:1.10.0-2-x86_64.pkg.tar.zst"
+sha256 = "C6200C776440678FE8C26ADAE6C104194B425D9393A9E3FC09F934363F0C39A6"
+
+[[package]]
+name = "zstd"
+version ="1.5.7"
+[package.source]
+mode = "binary"
+url = "https://umea.mirror.pkgbuild.com/core/os/x86_64/zstd-1.5.7-3-x86_64.pkg.tar.zst"
+sha256 = "D4CF0049137124C8A025EEDFAD267A3E8A02310C9EFB9D1AE4A61AA1D02789FC"
+
+[[package]]
+name = "expat"
+version ="2.7.5"
+[package.source]
+mode = "binary"
+url = "https://umea.mirror.pkgbuild.com/core/os/x86_64/expat-2.7.5-1-x86_64.pkg.tar.zst"
+sha256 = "788A328B29848CE0616C322F2B2AF231CF6B85D0FBB7A95A21F71DC38732C415"
+
+[[package]]
+name = "libdisplay-info"
+version ="0.3.0"
+[package.source]
+mode = "binary"
+url = "https://umea.mirror.pkgbuild.com/extra/os/x86_64/libdisplay-info-0.3.0-1-x86_64.pkg.tar.zst"
+sha256 = "07AB1479EC5E70AEA174E2D0E340BD9364B507ED74F2DF3BFD51B3C6F40E5787"
+
+
+
+[[package]]
+name = "libelf"
+version = "0.193"
+[package.source]
+mode = "pkgbuildlocal"
+path = "packages/libelf"
+
+
+[[package]]
+name = "libdrm"
+version = "2.4.131"
+[package.source]
+mode = "pkgbuildlocal"
+path = "packages/libdrm"
+
+[[package]]
+name = "libpciaccess"
+version ="0.19"
+[package.source]
+mode = "binary"
+url = "https://london.mirror.pkgbuild.com/extra/os/x86_64/libpciaccess-0.19-1-x86_64.pkg.tar.zst"
+sha256 = "EF533895E7688DA61749BEE185103435DBE635D9773D092FB0516E132817E39F"
+
+[[package]]
+name = "lm_sensors"
+version ="3.6.2"
+[package.source]
+mode = "binary"
+url = "https://london.mirror.pkgbuild.com/extra/os/x86_64/lm_sensors-1:3.6.2-1-x86_64.pkg.tar.zst"
+sha256 = "5363304255A506CF71E1ED4F0464166E5F2AAD6F0AE444FE08CAFD8C83BF11FF"

@@ -1,0 +1,28 @@
+# Maintainer: Andreas Radke <andyrtr@archlinux.org>
+
+pkgname=libdrm
+pkgver=2.4.131
+pkgrel=1
+pkgdesc="Userspace interface to kernel DRM services"
+url="https://dri.freedesktop.org/"
+arch=(x86_64)
+license=('MIT')
+depends=('libpciaccess' 'glibc')
+makedepends=('python-docutils' 'meson' cairo)
+source=(https://dri.freedesktop.org/$pkgname/$pkgname-$pkgver.tar.xz)
+sha512sums=('SKIP')
+
+build() {
+  arch-meson $pkgname-$pkgver build \
+    -D udev=false \
+    -D etnaviv=disabled \
+    -D freedreno=disabled \
+    -D vc4=disabled \
+    -D install-test-programs=false \
+    -D valgrind=disabled
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "$pkgdir"
+}

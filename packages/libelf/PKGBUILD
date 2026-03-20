@@ -1,0 +1,33 @@
+pkgname=libelf
+pkgver=0.193
+pkgrel=1
+pkgdesc="ELF object file access library (from elfutils)"
+arch=(x86_64)
+url="https://sourceware.org/elfutils/"
+license=(LGPL3)
+depends=(glibc zlib)
+options=(!lto !debug !strip "!buildflags")
+source=("https://sourceware.org/elfutils/ftp/${pkgver}/elfutils-${pkgver}.tar.bz2")
+sha256sums=(SKIP)
+
+build() {
+  cd "elfutils-${pkgver}"
+  # elfutils enables -Werror for some builds; GCC 15+ can error on const-correctness warnings here.
+  export CFLAGS="${CFLAGS:-} -Wno-error=discarded-qualifiers -Wno-discarded-qualifiers"
+  ./configure --prefix=/usr \
+              --disable-debuginfod \
+              --enable-libdebuginfod=dummy
+  make -j$(nproc)
+}
+
+package() {
+  cd "elfutils-${pkgver}"
+
+  make -C libelf DESTDIR="${pkgdir}" install
+
+  # Runtime-only: keep just the shared library.
+  rm -rf "${pkgdir}"/usr/{include,share}
+  rm -rf "${pkgdir}"/usr/lib/pkgconfig
+  rm -f "${pkgdir}"/usr/lib/libelf.a
+  find "${pkgdir}"/usr/lib -type f \( -name '*.a' -o -name '*.la' \) -delete
+}

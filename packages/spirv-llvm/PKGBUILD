@@ -106,7 +106,7 @@ build() {
 
   cmake -S SPIRV-LLVM-Translator -B build -G Ninja "${cmake_options[@]}"
   cd build
-  ninja
+  ninja -j$(nproc)
   cd ..
 
   patch_llvm_runtime "build" "/usr/lib/llvm-mesa/lib"
