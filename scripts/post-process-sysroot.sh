@@ -34,5 +34,6 @@ rm  $SYSROOT/usr/bin/mtrace -f
 rm  $SYSROOT/usr/bin/pwmconfig -f
 rm  $SYSROOT/usr/bin/pzstd -f
 rm  $SYSROOT/usr/bin/llvm-spirv -f
+rm  $SYSROOT/usr/bin/wayland-scanner -f
 rm  $SYSROOT/usr/share/licenses -rf
 

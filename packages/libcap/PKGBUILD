@@ -1,0 +1,33 @@
+# Maintainer: Tiago <tiago@ardos.local>
+pkgname=libcap-minimal
+pkgver=2.77
+pkgrel=1
+pkgdesc="Minimal libcap library without PAM support"
+arch=('x86_64')
+url="https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/"
+license=('LGPL2.1' 'GPL2')
+depends=()
+makedepends=('gcc' 'make')
+source=("https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-${pkgver}.tar.xz")
+sha256sums=('SKIP') # colocar sha256 real
+
+build() {
+    cd "$srcdir/libcap-${pkgver}"
+
+    # Compile sem suporte PAM
+    make lib=lib \
+         prefix=/usr \
+         LIB=lib \
+         CC="${CC:-gcc}" \
+         LDFLAGS="${LDFLAGS:-}" \
+         PAM_LIBS=
+}
+
+package() {
+    cd "$srcdir/libcap-${pkgver}"
+    # Cria diretórios de instalação
+    install -dm755 "$pkgdir/usr/lib"
+    # Instala biblioteca
+    install -vm755 libcap/lib*.so* "$pkgdir/usr/lib/"
+
+}

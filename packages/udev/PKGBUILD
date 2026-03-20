@@ -1,0 +1,48 @@
+# Maintainer: Tiago <tiago@ardos.local>
+pkgname=libudev-minimal
+pkgver=257.8
+pkgrel=1
+pkgdesc="Minimal libudev.so.1 only from systemd, sem daemons ou tools"
+arch=('x86_64')
+url="https://www.freedesktop.org/software/systemd/"
+license=('LGPL2.1' 'LGPL3')
+depends=()
+makedepends=('meson' 'ninja' 'gcc' 'pkgconf' 'glibc' gperf python-jinja)
+source=("https://github.com/systemd/systemd/archive/refs/tags/v${pkgver}.tar.gz")
+sha256sums=('SKIP') # substituir pelo checksum correto
+
+prepare() {
+    cd "$srcdir/systemd-$pkgver"
+
+    # Remove regras que exigem systemd completo
+    sed -i '/systemd-sysctl/s/^/#/' rules.d/99-systemd.rules.in
+
+    # Ajusta paths de network para instalação standalone
+    sed -e '/NETWORK_DIRS/s/systemd/udev/' \
+        -i src/libsystemd/sd-network/network-util.h
+}
+
+build() {
+    cd "$srcdir/systemd-$pkgver/build"
+    mkdir -p .
+
+    meson setup .. \
+        --prefix=/usr \
+        --buildtype=release \
+        -D mode=release \
+        -D dev-kvm-mode=0660 \
+        -D link-udev-shared=false \
+        -D logind=false \
+        -D vconsole=false \
+        -D tests=false \
+        -D man=disabled \
+        -D hwdb=false
+
+    ninja -C . libudev
+}
+
+package() {
+    cd "$srcdir/systemd-$pkgver/build"
+    install -dm755 "$pkgdir/usr/lib"
+    install -Dm755 libudev.so{,*[0-9]} "$pkgdir/usr/lib/"
+}
