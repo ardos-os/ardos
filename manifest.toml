@@ -11,6 +11,7 @@ build_script = "scripts/build-initramfs.sh"
 url = "https://git.kernel.org/torvalds/t/linux-6.18-rc3.tar.gz"
 
 [kernel.options]
+WERROR="n"
 FRAMEBUFFER_CONSOLE="n"
 FRAMEBUFFER_CONSOLE_DEFERRED_TAKEOVER="n"
 FRAMEBUFFER_CONSOLE_DETECT_PRIMARY="n"

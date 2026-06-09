@@ -14,6 +14,8 @@ sha256sums=('SKIP') # substituir pelo checksum correto
 prepare() {
     cd "$srcdir/systemd-$pkgver"
 
+    rm -rf build
+
     # Remove regras que exigem systemd completo
     sed -i '/systemd-sysctl/s/^/#/' rules.d/99-systemd.rules.in
 
@@ -23,10 +25,10 @@ prepare() {
 }
 
 build() {
-    cd "$srcdir/systemd-$pkgver/build"
-    mkdir -p .
+    cd "$srcdir/systemd-$pkgver"
 
-    meson setup .. \
+    rm -rf build
+    meson setup build . \
         --prefix=/usr \
         --buildtype=release \
         -D mode=release \
@@ -38,7 +40,7 @@ build() {
         -D man=disabled \
         -D hwdb=false
 
-    ninja -C . libudev
+    ninja -C build libudev
 }
 
 package() {
