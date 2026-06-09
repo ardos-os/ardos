@@ -3,12 +3,14 @@ mod loopdev;
 mod mount;
 mod proc;
 
-use std::{env, ffi::CString, fs, io, path::PathBuf, time::Duration};
+use std::{
+	env, ffi::CString, fs, io, os::unix::process::CommandExt, path::PathBuf, process::Command,
+};
 
 use crate::{
 	kernel_args::Args,
 	loopdev::LoopDevice,
-	mount::{mount, resolve_uuid, umount, MountFlags},
+	mount::{MountFlags, mount, resolve_uuid, umount},
 	proc::Proc,
 };
 
@@ -36,36 +38,8 @@ fn main() -> io::Result<()> {
 
 	switch_root(system_root_path)?;
 	ls("/")?;
-	println!("--- Ardos OS: GLIBC POST (Power On Self Test) ---");
-
-	// Testamos o próprio loader/libc como um executável.
-	// Se isso rodar, a fundação do sistema está operacional.
-	let glibc_path = CString::new("/usr/lib/libc.so.6").unwrap();
-	let arg0 = CString::new("libc_test").unwrap();
-	let args = [arg0.as_ptr(), std::ptr::null()];
-
-	unsafe {
-		// fork() se você quiser continuar o init depois, 
-		// ou apenas execv() se quiser que o teste seja a última coisa.
-		let pid = libc::fork();
-		if pid == 0 {
-			let res = libc::execv(glibc_path.as_ptr(), args.as_ptr());
-			if res == -1 {
-				let err = io::Error::last_os_error();
-				// Use epintln para garantir que sai no stderr
-				eprintln!("EXECV FAILED: {} (Code: {})", err, err.raw_os_error().unwrap_or(0));
-			}
-			// Se chegar aqui, falhou
-			libc::_exit(1);
-		} else {
-			let mut status = 0;
-			libc::waitpid(pid, &mut status, 0);
-			println!("GLIBC test finished with status: {}", status);
-		}
-	}
-	std::thread::sleep(Duration::from_secs(5));
-	
-	Ok(())
+	prepare_runtime_filesystems()?;
+	launch_shift()
 }
 
 fn ls<P: AsRef<std::path::Path>>(path: P) -> io::Result<()> {
@@ -118,6 +92,60 @@ fn mount_system_image(device: impl Into<PathBuf>) -> io::Result<PathBuf> {
 	println!("✅ Mounted {} to {}", device.display(), SYSTEM_PATH);
 	Ok(PathBuf::from(SYSTEM_PATH))
 }
+
+fn prepare_runtime_filesystems() -> io::Result<()> {
+	ensure_mountpoint("/run")?;
+	mount(
+		"tmpfs",
+		"/run",
+		"tmpfs",
+		MountFlags::NOSUID | MountFlags::NODEV,
+	)?;
+	fs::create_dir_all("/run/udev")?;
+
+	ensure_mountpoint("/tmp")?;
+	mount(
+		"tmpfs",
+		"/tmp",
+		"tmpfs",
+		MountFlags::NOSUID | MountFlags::NODEV,
+	)?;
+	let mut permissions = fs::metadata("/tmp")?.permissions();
+	use std::os::unix::fs::PermissionsExt;
+	permissions.set_mode(0o1777);
+	fs::set_permissions("/tmp", permissions)?;
+	Ok(())
+}
+
+fn ensure_mountpoint(path: &str) -> io::Result<()> {
+	if std::path::Path::new(path).is_dir() {
+		return Ok(());
+	}
+
+	Err(io::Error::new(
+		io::ErrorKind::NotFound,
+		format!("missing runtime mountpoint {path} in the system image"),
+	))
+}
+
+fn launch_shift() -> io::Result<()> {
+	const SHIFT_PATH: &str = "/usr/bin/shift";
+	if !std::path::Path::new(SHIFT_PATH).exists() {
+		return Err(io::Error::new(
+			io::ErrorKind::NotFound,
+			format!("{SHIFT_PATH} is missing from the system image"),
+		));
+	}
+
+	println!("init-stage-1: launching {SHIFT_PATH} as PID 1");
+	let error = Command::new(SHIFT_PATH)
+		.env("HOME", "/")
+		.env("RUST_LOG", "info")
+		.exec();
+	dbg!(&error);
+	std::thread::sleep(std::time::Duration::from_secs(5));
+	Err(error)
+}
 pub fn switch_root(new_root: impl Into<PathBuf>) -> io::Result<()> {
 	let new_root = new_root.into();
 	println!("switch_root: switching root to {}", new_root.display());
@@ -136,7 +164,12 @@ pub fn switch_root(new_root: impl Into<PathBuf>) -> io::Result<()> {
 		let new_target = new_root.join(mnt.strip_prefix('/').unwrap_or(mnt));
 
 		println!("switch_root: moving {} -> {}", mnt, new_target.display());
-		match mount(mnt, &new_target.display().to_string(), None, MountFlags::MOVE) {
+		match mount(
+			mnt,
+			&new_target.display().to_string(),
+			None,
+			MountFlags::MOVE,
+		) {
 			Ok(_) => {}
 			Err(e) => {
 				eprintln!(

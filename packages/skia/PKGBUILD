@@ -1,0 +1,132 @@
+# Maintainer: Tiago <tiago@ardos.local>
+
+pkgname=skia
+pkgver=0.91.0
+pkgrel=1
+pkgdesc="Shared Skia runtime and build headers for Ardos"
+arch=('x86_64')
+url="https://skia.org/"
+license=('BSD-3-Clause')
+depends=('glibc' 'libstdc++' 'freetype2' 'fontconfig')
+makedepends=('git' 'python' 'clang' 'ninja' 'pkgconf')
+_skia_commit=b88b661b7fca3a45cf6d5d684d1259939eca1c71
+source=(
+    "skia-${_skia_commit}.tar.gz::https://skia.googlesource.com/skia/+archive/${_skia_commit}.tar.gz"
+)
+noextract=("skia-${_skia_commit}.tar.gz")
+sha256sums=('SKIP')
+
+_gn_outdir="out/ardos-shared"
+
+prepare() {
+    rm -rf "$srcdir/skia"
+    mkdir "$srcdir/skia"
+    bsdtar -xf "$srcdir/skia-${_skia_commit}.tar.gz" -C "$srcdir/skia"
+
+    cd "$srcdir/skia"
+
+    # Skia's helper fetches every dependency concurrently, which regularly
+    # triggers HTTP 429 responses in clean package containers. Fetch them
+    # sequentially and retry transient failures.
+    python - <<'PY'
+from pathlib import Path
+
+path = Path("tools/git-sync-deps")
+source = path.read_text()
+old = """def multithread(function, list_of_arg_lists):
+  anything_failed = False
+  threads = []
+  def hook(args):
+    nonlocal anything_failed
+    anything_failed = True
+  threading.excepthook = hook
+  for args in list_of_arg_lists:
+    thread = threading.Thread(None, function, None, args)
+    thread.start()
+    threads.append(thread)
+  for thread in threads:
+    thread.join()
+  if anything_failed:
+    raise Exception("Thread failure detected")
+"""
+new = """def multithread(function, list_of_arg_lists):
+  import time
+  for args in list_of_arg_lists:
+    for attempt in range(5):
+      try:
+        function(*args)
+        break
+      except Exception:
+        if attempt == 4:
+          raise
+        time.sleep(5 * (attempt + 1))
+"""
+if old not in source:
+    raise SystemExit("unable to patch Skia git-sync-deps")
+path.write_text(source.replace(old, new))
+PY
+
+    GIT_SYNC_DEPS_SKIP_EMSDK=1 python tools/git-sync-deps
+}
+
+build() {
+    cd "$srcdir/skia"
+
+    bin/gn gen "${_gn_outdir}" --args="
+        is_official_build=true
+        is_debug=false
+        is_component_build=true
+        skia_enable_ganesh=true
+        skia_enable_skottie=false
+        skia_enable_pdf=false
+        skia_enable_svg=false
+        skia_use_gl=true
+        skia_use_egl=false
+        skia_use_x11=false
+        skia_use_vulkan=false
+        skia_use_metal=false
+        skia_use_direct3d=false
+        skia_use_libjpeg_turbo_decode=false
+        skia_use_libjpeg_turbo_encode=false
+        skia_use_libwebp_decode=false
+        skia_use_libwebp_encode=false
+        skia_use_dng_sdk=false
+        skia_use_piex=false
+        skia_use_freetype=true
+        skia_use_fontconfig=true
+        skia_use_system_freetype2=true
+        cc=\"clang\"
+        cxx=\"clang++\"
+        extra_cflags=[\"-I/usr/include/freetype2\"]
+    "
+
+    ninja -C "${_gn_outdir}" skia
+
+    mapfile -t _defines < <(
+        awk '/^defines = /{sub(/^defines = /, ""); for (i = 1; i <= NF; ++i) print $i}' \
+            "${_gn_outdir}/obj/skia.ninja" \
+            "${_gn_outdir}/obj/gpu.ninja" | awk '!seen[$0]++'
+    )
+    printf '%s\n' "${_defines[*]}" > "${_gn_outdir}/skia-defines.txt"
+}
+
+package() {
+    cd "$srcdir/skia"
+
+    install -d "${pkgdir}/usr/lib/skia/source"
+
+    install -Dm755 \
+        "${_gn_outdir}/libskia.so" \
+        "${pkgdir}/usr/lib/libskia.so"
+
+    install -Dm644 \
+        "${_gn_outdir}/skia-defines.txt" \
+        "${pkgdir}/usr/lib/skia/skia-defines.txt"
+
+    cp -r include "${pkgdir}/usr/lib/skia/source/"
+    install -d "${pkgdir}/usr/lib/skia/source/modules"
+    cp -r modules/skcms "${pkgdir}/usr/lib/skia/source/modules/"
+    install -Dm644 \
+        src/gpu/ganesh/gl/GrGLDefines.h \
+        "${pkgdir}/usr/lib/skia/source/src/gpu/ganesh/gl/GrGLDefines.h"
+}

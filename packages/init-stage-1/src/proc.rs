@@ -2,7 +2,6 @@ use std::fs;
 use std::io;
 use std::marker::PhantomData;
 
-use crate::mount::umount;
 use crate::mount::{MountFlags, mount};
 
 pub struct Proc {

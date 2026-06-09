@@ -4,3 +4,6 @@
 [submodule "packages/glibc"]
 	path = packages/glibc
 	url = https://github.com/ardos-os/pkg-glibc
+[submodule "packages/shift"]
+	path = packages/shift
+	url = https://github.com/ardos-os/shift

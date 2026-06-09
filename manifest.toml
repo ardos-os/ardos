@@ -30,7 +30,18 @@ DRM_MGAG200="y"
 DRM_QXL="y"
 DRM_VIRTIO_GPU="y"
 DRM_VIRTIO_GPU_KMS="y"
+VIRTIO="y"
+VIRTIO_PCI="y"
+VIRTIO_BLK="y"
 DRM_PANEL="y"
+DEVTMPFS="y"
+DEVTMPFS_MOUNT="y"
+TMPFS="y"
+INPUT="y"
+INPUT_EVDEV="y"
+HID="y"
+HID_GENERIC="y"
+USB_HID="y"
 BTRFS_FS="y"
 SQUASHFS="y"
 SQUASHFS_ZSTD="y"
@@ -39,7 +50,7 @@ SQUASHFS_COMPILE_DECOMP_MULTI_PERCPU="y"
 
 [[package]]
 name = "glibc-ardos"
-version = "2.41"
+version = "2.43"
 [package.source]
 mode = "pkgbuildlocal"
 path = "packages/glibc"
@@ -146,6 +157,46 @@ url = "https://umea.mirror.pkgbuild.com/core/os/x86_64/expat-2.7.5-1-x86_64.pkg.
 sha256 = "788A328B29848CE0616C322F2B2AF231CF6B85D0FBB7A95A21F71DC38732C415"
 
 [[package]]
+name = "brotli"
+version = "1.2.0"
+[package.source]
+mode = "binary"
+url = "https://mirror.23m.com/manjaro/stable/core/x86_64/brotli-1.2.0-1-x86_64.pkg.tar.zst"
+sha256 = "4A0C95D5967476D0EFDAF76D344B61E3EEE02CD7920A315E457F3FD96311B7EC"
+
+[[package]]
+name = "bzip2"
+version = "1.0.8"
+[package.source]
+mode = "binary"
+url = "https://mirror.23m.com/manjaro/stable/core/x86_64/bzip2-1.0.8-6-x86_64.pkg.tar.zst"
+sha256 = "8779003D659C441B952095C19907603A738C1366F25CC51BE3FD139FA4E95748"
+
+[[package]]
+name = "libpng"
+version = "1.6.58"
+[package.source]
+mode = "binary"
+url = "https://mirror.23m.com/manjaro/stable/extra/x86_64/libpng-1.6.58-1-x86_64.pkg.tar.zst"
+sha256 = "8D80045F15F6339B2284DB5DF06A4287225CC2389C24DBB2FBC23458F6887EE5"
+
+[[package]]
+name = "freetype2"
+version = "2.14.1"
+[package.source]
+mode = "binary"
+url = "https://mirror.23m.com/manjaro/stable/extra/x86_64/freetype2-2.14.1-2-x86_64.pkg.tar.zst"
+sha256 = "FA7E766196FED2EF484B66D228FB783308C3B37B907D556190907E2324862749"
+
+[[package]]
+name = "fontconfig"
+version = "2.17.1"
+[package.source]
+mode = "binary"
+url = "https://mirror.23m.com/manjaro/stable/extra/x86_64/fontconfig-2:2.17.1-1-x86_64.pkg.tar.zst"
+sha256 = "64DCC7CCAA5460B93CE1C76A9E104BCBB373D3D15FB5ABC01A1192F4607E9D2E"
+
+[[package]]
 name = "libdisplay-info"
 version ="0.3.0"
 [package.source]
@@ -210,8 +261,107 @@ mode = "pkgbuildlocal"
 path = "packages/udev"
 
 [[package]]
+name = "libevdev"
+version = "1.13.6"
+[package.source]
+mode = "binary"
+url = "https://mirror.23m.com/manjaro/stable/extra/x86_64/libevdev-1.13.6-1-x86_64.pkg.tar.zst"
+sha256 = "47508EC2C1CA6BC21F692937D500D7F4B72B117D2BF15D7FE59ADC6AF4A98C2F"
+
+[[package]]
+name = "mtdev"
+version = "1.1.7"
+[package.source]
+mode = "binary"
+url = "https://mirror.23m.com/manjaro/stable/extra/x86_64/mtdev-1.1.7-1-x86_64.pkg.tar.zst"
+sha256 = "F04B23715273930002A0133EBD0F48AD4374B9E3EC9484A500A33B6AEE478443"
+
+[[package]]
+name = "libgudev"
+version = "238"
+[package.source]
+mode = "binary"
+url = "https://mirror.23m.com/manjaro/stable/extra/x86_64/libgudev-238-3-x86_64.pkg.tar.zst"
+sha256 = "2EB60ECEC6A7C1C2B18AE9C259AFEB45AD18ABB4CDFA486FF38F333557ED520F"
+
+[[package]]
+name = "libwacom"
+version = "2.18.0"
+[package.source]
+mode = "binary"
+url = "https://mirror.23m.com/manjaro/stable/extra/x86_64/libwacom-2.18.0-2-x86_64.pkg.tar.zst"
+sha256 = "1D9FFF9093AA29A8BD8D41263D19940E7AF75CC98CF1B44577AE1BEF9BFB260E"
+
+[[package]]
+name = "glib2"
+version = "2.86.4"
+[package.source]
+mode = "binary"
+url = "https://mirror.23m.com/manjaro/stable/core/x86_64/glib2-2.86.4-1-x86_64.pkg.tar.zst"
+sha256 = "F0D72902886C4143DD856213FC820B5D150F24A45142BF51105CD57A406A9228"
+
+[[package]]
+name = "pcre2"
+version = "10.47"
+[package.source]
+mode = "binary"
+url = "https://mirror.23m.com/manjaro/stable/core/x86_64/pcre2-10.47-1-x86_64.pkg.tar.zst"
+sha256 = "54E0D8C998D2748F47FEAD1926B04357719BDD00FA1CEA84901C3AF501AAB002"
+
+[[package]]
+name = "libinput-minimal"
+version = "1.30.1"
+build_deps = [
+  "libevdev",
+  "mtdev",
+  "libgudev",
+  "libwacom",
+  "glib2",
+  "pcre2",
+  "libffi",
+]
+[package.source]
+mode = "pkgbuildlocal"
+path = "packages/libinput"
+
+[[package]]
 name = "libcap-minimal"
 version ="2.77"
 [package.source]
 mode = "pkgbuildlocal"
 path = "packages/libcap"
+
+[[package]]
+name = "skia"
+version = "0.91.0"
+build_deps = ["freetype2", "fontconfig"]
+[package.source]
+mode = "pkgbuildlocal"
+path = "packages/skia"
+[package.docker]
+dockerfile_path = "packages/skia/Dockerfile"
+
+[[package]]
+name = "shift"
+version = "0.1.0_alpha"
+build_deps = [
+  "mesa",
+  "expat",
+  "freetype2",
+  "fontconfig",
+  "libdrm",
+  "libevdev",
+  "mtdev",
+  "libgudev",
+  "libwacom",
+  "glib2",
+  "pcre2",
+  "libffi",
+  "skia",
+  "libinput-minimal",
+]
+[package.source]
+mode = "pkgbuildlocal"
+path = "packages/shift"
+[package.docker]
+dockerfile_path = "packages/shift/Dockerfile"

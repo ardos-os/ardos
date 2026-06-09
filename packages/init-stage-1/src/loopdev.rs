@@ -5,14 +5,13 @@
 use std::{
 	fs, io, mem,
 	os::unix::fs::OpenOptionsExt,
-	os::unix::io::{AsRawFd, FromRawFd, RawFd},
+	os::unix::io::AsRawFd,
 	path::{Path, PathBuf},
 };
 
 /// IOCTL constants (libc-only)
 const LOOP_CTL_GET_FREE: libc::c_ulong = 0x4C82;
 const LOOP_SET_FD: libc::c_ulong = 0x4C00;
-const LOOP_CLR_FD: libc::c_ulong = 0x4C01;
 const LOOP_SET_STATUS64: libc::c_ulong = 0x4C04;
 
 /// Minimal LoopInfo64 for setting filename (optional)
@@ -102,9 +101,7 @@ impl LoopDevice {
 		// descartamos `ctl` explicitamente (fecha)
 		drop(ctl);
 
-		Ok(Self {
-			loop_path,
-		})
+		Ok(Self { loop_path })
 	}
 
 	/// Caminho do device (ex: /dev/loop0)

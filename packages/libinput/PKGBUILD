@@ -1,0 +1,64 @@
+# Maintainer: Tiago <tiago@ardos.local>
+
+pkgname=libinput-minimal
+pkgver=1.30.1
+pkgrel=1
+pkgdesc="Static libinput for Shift with runtime quirks data"
+arch=('x86_64')
+url="https://wayland.freedesktop.org/libinput/doc/latest/"
+license=('MIT')
+depends=('glibc' 'libevdev' 'libwacom' 'mtdev')
+makedepends=('meson' 'ninja' 'pkgconf' 'gcc')
+provides=('libinput-static')
+conflicts=('libinput')
+options=('staticlibs' '!lto')
+source=("https://gitlab.freedesktop.org/libinput/libinput/-/archive/${pkgver}/libinput-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+prepare() {
+    cd "$srcdir/libinput-${pkgver}"
+
+    rm -rf build
+
+    # Shift is the only libinput consumer. Build libinput itself as a static
+    # archive while keeping its lower-level dependencies dynamically linked.
+    sed -i \
+        -e "s/lib_libinput = shared_library('input'/lib_libinput = static_library('input'/" \
+        -e '/^[[:space:]]*version : libinput_so_version,$/d' \
+        -e '/^[[:space:]]*link_args : version_flag,$/d' \
+        -e '/^[[:space:]]*link_depends : mapfile,$/d' \
+        meson.build
+}
+
+build() {
+    cd "$srcdir/libinput-${pkgver}"
+
+    rm -rf build
+    arch-meson . build \
+        --prefix=/usr \
+        -D documentation=false \
+        -D tests=false \
+        -D install-tests=false \
+        -D debug-gui=false \
+        -D autoload-plugins=false \
+        -D lua-plugins=disabled \
+        -D b_staticpic=true
+
+    meson compile -C build
+}
+
+package() {
+    cd "$srcdir/libinput-${pkgver}"
+
+    meson install -C build --destdir "$pkgdir"
+
+    # Keep the static archive for Shift builds and the runtime quirks data.
+    rm -rf \
+        "$pkgdir/usr/include" \
+        "$pkgdir/usr/lib/pkgconfig" \
+        "$pkgdir/usr/bin" \
+        "$pkgdir/usr/lib/libinput" \
+        "$pkgdir/usr/lib/udev" \
+        "$pkgdir/usr/share/man" \
+        "$pkgdir/usr/share/zsh"
+}

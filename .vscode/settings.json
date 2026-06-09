@@ -1,0 +1,3 @@
+{
+    "rust-analyzer.linkedProjects": ["packages/ardos-packer/Cargo.toml", "packages/shift/Cargo.toml", "packages/init-stage-1/Cargo.toml"]
+}
