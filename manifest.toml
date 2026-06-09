@@ -68,14 +68,14 @@ name = "libgcc"
 version = "15.2.1+r604+g0b99615a8aef"
 [package.source]
 mode = "binary"
-url = "https://mirror.moson.org/arch/core/os/x86_64/libgcc-15.2.1+r604+g0b99615a8aef-1-x86_64.pkg.tar.zst"
+url = "https://archive.archlinux.org/packages/l/libgcc/libgcc-15.2.1+r604+g0b99615a8aef-1-x86_64.pkg.tar.zst"
 sha256 = "00EBC06EF4B8FF5C1FD7BD7B6FAAFDC7C3BFA7F1F3A170FF2F2025D1F0B62ACE"
 [[package]]
 name = "libstdc++"
 version = "15.2.1+r604+g0b99615a8aef"
 [package.source]
 mode = "binary"
-url = "https://mirror.moson.org/arch/core/os/x86_64/libstdc++-15.2.1+r604+g0b99615a8aef-1-x86_64.pkg.tar.zst"
+url = "https://archive.archlinux.org/packages/l/libstdc++/libstdc++-15.2.1+r604+g0b99615a8aef-1-x86_64.pkg.tar.zst"
 sha256 = "73DC1B0000E915339759D9492BB30E93FF343E041D5D5601B2BEFDA12235EC78"
 
 [[package]]
@@ -105,7 +105,7 @@ version ="1.4.341.0"
 
 [package.source]
 mode ="binary"
-url = "https://mirror.moson.org/arch/extra/os/x86_64/spirv-tools-1:1.4.341.0-2-x86_64.pkg.tar.zst"
+url = "https://archive.archlinux.org/packages/s/spirv-tools/spirv-tools-1:1.4.341.0-2-x86_64.pkg.tar.zst"
 sha256 = "4B1C76864DA8E14B7ED034FA77F6CACAE2F3D959AADC980E1F284C7E75387C2C"
 [[package]]
 name = "spirv-llvm-translator"
@@ -120,7 +120,7 @@ version ="1.3.2"
 
 [package.source]
 mode = "binary"
-url ="https://umea.mirror.pkgbuild.com/core/os/x86_64/zlib-1:1.3.2-3-x86_64.pkg.tar.zst"
+url ="https://archive.archlinux.org/packages/z/zlib/zlib-1:1.3.2-3-x86_64.pkg.tar.zst"
 sha256 = "41CF0BB5DF14E18F7FB868A97DA3FEB7C4127FBA99BB332AD54B14322FAAC1B1"
 
 
@@ -129,7 +129,7 @@ name = "xz"
 version ="5.8.2"
 [package.source]
 mode = "binary"
-url ="https://umea.mirror.pkgbuild.com/core/os/x86_64/xz-5.8.2-1-x86_64.pkg.tar.zst"
+url ="https://archive.archlinux.org/packages/x/xz/xz-5.8.2-1-x86_64.pkg.tar.zst"
 sha256 = "23BCEA71064A929C76F95A324B68E6856A8880C6F70D525F4A83C391CA07B88A"
 
 [[package]]
@@ -137,7 +137,7 @@ name = "lz4"
 version ="1.10.0"
 [package.source]
 mode = "binary"
-url = "https://umea.mirror.pkgbuild.com/core/os/x86_64/lz4-1:1.10.0-2-x86_64.pkg.tar.zst"
+url = "https://archive.archlinux.org/packages/l/lz4/lz4-1:1.10.0-2-x86_64.pkg.tar.zst"
 sha256 = "C6200C776440678FE8C26ADAE6C104194B425D9393A9E3FC09F934363F0C39A6"
 
 [[package]]
@@ -145,7 +145,7 @@ name = "zstd"
 version ="1.5.7"
 [package.source]
 mode = "binary"
-url = "https://umea.mirror.pkgbuild.com/core/os/x86_64/zstd-1.5.7-3-x86_64.pkg.tar.zst"
+url = "https://archive.archlinux.org/packages/z/zstd/zstd-1.5.7-3-x86_64.pkg.tar.zst"
 sha256 = "D4CF0049137124C8A025EEDFAD267A3E8A02310C9EFB9D1AE4A61AA1D02789FC"
 
 [[package]]
@@ -153,7 +153,7 @@ name = "expat"
 version ="2.7.5"
 [package.source]
 mode = "binary"
-url = "https://umea.mirror.pkgbuild.com/core/os/x86_64/expat-2.7.5-1-x86_64.pkg.tar.zst"
+url = "https://archive.archlinux.org/packages/e/expat/expat-2.7.5-1-x86_64.pkg.tar.zst"
 sha256 = "788A328B29848CE0616C322F2B2AF231CF6B85D0FBB7A95A21F71DC38732C415"
 
 [[package]]
@@ -161,7 +161,7 @@ name = "brotli"
 version = "1.2.0"
 [package.source]
 mode = "binary"
-url = "https://mirror.23m.com/manjaro/stable/core/x86_64/brotli-1.2.0-1-x86_64.pkg.tar.zst"
+url = "https://archive.archlinux.org/packages/b/brotli/brotli-1.2.0-1-x86_64.pkg.tar.zst"
 sha256 = "4A0C95D5967476D0EFDAF76D344B61E3EEE02CD7920A315E457F3FD96311B7EC"
 
 [[package]]
@@ -169,7 +169,7 @@ name = "bzip2"
 version = "1.0.8"
 [package.source]
 mode = "binary"
-url = "https://mirror.23m.com/manjaro/stable/core/x86_64/bzip2-1.0.8-6-x86_64.pkg.tar.zst"
+url = "https://archive.archlinux.org/packages/b/bzip2/bzip2-1.0.8-6-x86_64.pkg.tar.zst"
 sha256 = "8779003D659C441B952095C19907603A738C1366F25CC51BE3FD139FA4E95748"
 
 [[package]]
@@ -177,7 +177,7 @@ name = "libpng"
 version = "1.6.58"
 [package.source]
 mode = "binary"
-url = "https://mirror.23m.com/manjaro/stable/extra/x86_64/libpng-1.6.58-1-x86_64.pkg.tar.zst"
+url = "https://archive.archlinux.org/packages/l/libpng/libpng-1.6.58-1-x86_64.pkg.tar.zst"
 sha256 = "8D80045F15F6339B2284DB5DF06A4287225CC2389C24DBB2FBC23458F6887EE5"
 
 [[package]]
@@ -185,7 +185,7 @@ name = "freetype2"
 version = "2.14.1"
 [package.source]
 mode = "binary"
-url = "https://mirror.23m.com/manjaro/stable/extra/x86_64/freetype2-2.14.1-2-x86_64.pkg.tar.zst"
+url = "https://archive.archlinux.org/packages/f/freetype2/freetype2-2.14.1-2-x86_64.pkg.tar.zst"
 sha256 = "FA7E766196FED2EF484B66D228FB783308C3B37B907D556190907E2324862749"
 
 [[package]]
@@ -193,7 +193,7 @@ name = "fontconfig"
 version = "2.17.1"
 [package.source]
 mode = "binary"
-url = "https://mirror.23m.com/manjaro/stable/extra/x86_64/fontconfig-2:2.17.1-1-x86_64.pkg.tar.zst"
+url = "https://archive.archlinux.org/packages/f/fontconfig/fontconfig-2:2.17.1-1-x86_64.pkg.tar.zst"
 sha256 = "64DCC7CCAA5460B93CE1C76A9E104BCBB373D3D15FB5ABC01A1192F4607E9D2E"
 
 [[package]]
@@ -201,7 +201,7 @@ name = "libdisplay-info"
 version ="0.3.0"
 [package.source]
 mode = "binary"
-url = "https://umea.mirror.pkgbuild.com/extra/os/x86_64/libdisplay-info-0.3.0-1-x86_64.pkg.tar.zst"
+url = "https://archive.archlinux.org/packages/l/libdisplay-info/libdisplay-info-0.3.0-1-x86_64.pkg.tar.zst"
 sha256 = "07AB1479EC5E70AEA174E2D0E340BD9364B507ED74F2DF3BFD51B3C6F40E5787"
 
 
@@ -226,7 +226,7 @@ name = "libpciaccess"
 version ="0.19"
 [package.source]
 mode = "binary"
-url = "https://london.mirror.pkgbuild.com/extra/os/x86_64/libpciaccess-0.19-1-x86_64.pkg.tar.zst"
+url = "https://archive.archlinux.org/packages/l/libpciaccess/libpciaccess-0.19-1-x86_64.pkg.tar.zst"
 sha256 = "EF533895E7688DA61749BEE185103435DBE635D9773D092FB0516E132817E39F"
 
 [[package]]
@@ -234,7 +234,7 @@ name = "lm_sensors"
 version ="3.6.2"
 [package.source]
 mode = "binary"
-url = "https://london.mirror.pkgbuild.com/extra/os/x86_64/lm_sensors-1:3.6.2-1-x86_64.pkg.tar.zst"
+url = "https://archive.archlinux.org/packages/l/lm_sensors/lm_sensors-1:3.6.2-1-x86_64.pkg.tar.zst"
 sha256 = "5363304255A506CF71E1ED4F0464166E5F2AAD6F0AE444FE08CAFD8C83BF11FF"
 
 [[package]]
@@ -242,7 +242,7 @@ name = "wayland"
 version ="1.24.0"
 [package.source]
 mode = "binary"
-url = "https://mirror.moson.org/arch/extra/os/x86_64/wayland-1.24.0-1-x86_64.pkg.tar.zst"
+url = "https://archive.archlinux.org/packages/w/wayland/wayland-1.24.0-1-x86_64.pkg.tar.zst"
 sha256 = "C5BB589F6AB9ECFD1E3DB0AF14BAAEE530DA9FE1EDD87D19B07E946A0513EB9C"
 
 [[package]]
@@ -250,7 +250,7 @@ name = "libffi"
 version ="3.5.2"
 [package.source]
 mode = "binary"
-url = "https://mirror.moson.org/arch/core/os/x86_64/libffi-3.5.2-1-x86_64.pkg.tar.zst"
+url = "https://archive.archlinux.org/packages/l/libffi/libffi-3.5.2-1-x86_64.pkg.tar.zst"
 sha256 = "6855AA68AE506C124F9E62C6BE3DD40DD750A050D7126D5265118128638DA5C3"
 
 [[package]]
@@ -265,7 +265,7 @@ name = "libevdev"
 version = "1.13.6"
 [package.source]
 mode = "binary"
-url = "https://mirror.23m.com/manjaro/stable/extra/x86_64/libevdev-1.13.6-1-x86_64.pkg.tar.zst"
+url = "https://archive.archlinux.org/packages/l/libevdev/libevdev-1.13.6-1-x86_64.pkg.tar.zst"
 sha256 = "47508EC2C1CA6BC21F692937D500D7F4B72B117D2BF15D7FE59ADC6AF4A98C2F"
 
 [[package]]
@@ -273,7 +273,7 @@ name = "mtdev"
 version = "1.1.7"
 [package.source]
 mode = "binary"
-url = "https://mirror.23m.com/manjaro/stable/extra/x86_64/mtdev-1.1.7-1-x86_64.pkg.tar.zst"
+url = "https://archive.archlinux.org/packages/m/mtdev/mtdev-1.1.7-1-x86_64.pkg.tar.zst"
 sha256 = "F04B23715273930002A0133EBD0F48AD4374B9E3EC9484A500A33B6AEE478443"
 
 [[package]]
@@ -281,7 +281,7 @@ name = "libgudev"
 version = "238"
 [package.source]
 mode = "binary"
-url = "https://mirror.23m.com/manjaro/stable/extra/x86_64/libgudev-238-3-x86_64.pkg.tar.zst"
+url = "https://archive.archlinux.org/packages/l/libgudev/libgudev-238-3-x86_64.pkg.tar.zst"
 sha256 = "2EB60ECEC6A7C1C2B18AE9C259AFEB45AD18ABB4CDFA486FF38F333557ED520F"
 
 [[package]]
@@ -289,7 +289,7 @@ name = "libwacom"
 version = "2.18.0"
 [package.source]
 mode = "binary"
-url = "https://mirror.23m.com/manjaro/stable/extra/x86_64/libwacom-2.18.0-2-x86_64.pkg.tar.zst"
+url = "https://archive.archlinux.org/packages/l/libwacom/libwacom-2.18.0-2-x86_64.pkg.tar.zst"
 sha256 = "1D9FFF9093AA29A8BD8D41263D19940E7AF75CC98CF1B44577AE1BEF9BFB260E"
 
 [[package]]
@@ -297,7 +297,7 @@ name = "glib2"
 version = "2.86.4"
 [package.source]
 mode = "binary"
-url = "https://mirror.23m.com/manjaro/stable/core/x86_64/glib2-2.86.4-1-x86_64.pkg.tar.zst"
+url = "https://archive.archlinux.org/packages/g/glib2/glib2-2.86.4-1-x86_64.pkg.tar.zst"
 sha256 = "F0D72902886C4143DD856213FC820B5D150F24A45142BF51105CD57A406A9228"
 
 [[package]]
@@ -305,7 +305,7 @@ name = "pcre2"
 version = "10.47"
 [package.source]
 mode = "binary"
-url = "https://mirror.23m.com/manjaro/stable/core/x86_64/pcre2-10.47-1-x86_64.pkg.tar.zst"
+url = "https://archive.archlinux.org/packages/p/pcre2/pcre2-10.47-1-x86_64.pkg.tar.zst"
 sha256 = "54E0D8C998D2748F47FEAD1926B04357719BDD00FA1CEA84901C3AF501AAB002"
 
 [[package]]
