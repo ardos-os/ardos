@@ -366,3 +366,12 @@ mode = "pkgbuildlocal"
 path = "packages/shift"
 [package.docker]
 dockerfile_path = "packages/shift/Dockerfile"
+
+[[package]]
+name = "libglvnd"
+version = "1.7.0"
+build_deps = ["mesa", "llvm-mesa"]
+[package.source]
+mode = "pkgbuildlocal"
+path = "packages/libglvnd"
+

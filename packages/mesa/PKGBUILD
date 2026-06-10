@@ -111,6 +111,7 @@ declare -A _crates=(
   zerocopy         0.8.13
   zerocopy-derive  0.8.13
 )
+DLAGENTS=("https::/usr/bin/curl -A 'Mozilla' -fLC - --retry 3 --retry-delay 3 -o %o %u")
 
 # Used to generate the above table
 _gencrates() {
@@ -207,7 +208,6 @@ build() {
     -D valgrind=disabled
     -D html-docs=disabled
     -D vulkan-layers=device-select,intel-nullhw,overlay,screenshot,anti-lag,vram-report-limit
-    -D video-codecs=all
     -D xlib-lease=disabled
 
     -D gallium-rusticl-enable-drivers=asahi,freedreno,radeonsi
@@ -247,7 +247,7 @@ build() {
   export MESON_PACKAGE_CACHE_DIR="$srcdir"
 
   # Configure & build
-  arch-meson mesa-$_pkgver build "${meson_options[@]}"
+  arch-meson mesa-$_pkgver build "${meson_options[@]}" || arch-meson mesa-$_pkgver build "${meson_options[@]}" --wipe
   meson compile -C build
   
   patch_llvm_runtime "build" "/usr/lib/llvm-mesa/lib"

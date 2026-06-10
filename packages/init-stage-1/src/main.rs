@@ -21,6 +21,7 @@ fn main() -> io::Result<()> {
 
 	mount_dev()?;
 	mount_sys()?;
+	prepare_initramfs_mountpoints()?;
 
 	let system_partition_path = mount_system_partition(&args)?;
 	dbg!(&args, &system_partition_path);
@@ -69,6 +70,10 @@ fn mount_dev() -> io::Result<()> {
 fn mount_sys() -> io::Result<()> {
 	fs::create_dir_all("/sys")?;
 	mount("sysfs", "/sys", "sysfs", MountFlags::empty())
+}
+
+fn prepare_initramfs_mountpoints() -> io::Result<()> {
+	fs::create_dir_all("/run")
 }
 
 fn mount_system_partition(args: &Args) -> io::Result<PathBuf> {
@@ -137,10 +142,18 @@ fn launch_shift() -> io::Result<()> {
 		));
 	}
 
+	println!("init-stage-1: DRM device nodes before launching Shift");
+	if let Err(err) = ls("/dev/dri") {
+		eprintln!("init-stage-1: failed to list /dev/dri: {err}");
+	}
 	println!("init-stage-1: launching {SHIFT_PATH} as PID 1");
 	let error = Command::new(SHIFT_PATH)
-		.env("HOME", "/")
-		.env("RUST_LOG", "info")
+		.env("HOME", "/run/")
+		.env("RUST_LOG", "trace")
+        .env("LIBGL_DEBUG", "verbose")
+        .env("EGL_LOG_LEVEL", "debug")
+        .env("MESA_DEBUG", "context")
+        .env("RUST_BACKTRACE", "full")
 		.exec();
 	dbg!(&error);
 	std::thread::sleep(std::time::Duration::from_secs(5));
