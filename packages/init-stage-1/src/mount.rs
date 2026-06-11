@@ -44,7 +44,7 @@ pub fn mount<'a>(
 			target_c.as_ptr(),
 			fstype_c
 				.as_ref()
-				.map_or_else(std::ptr::null, |fs| dbg!(fs).as_ptr()),
+				.map_or_else(std::ptr::null, |fs| fs.as_ptr()),
 			flags.bits(),
 			std::ptr::null(),
 		)
@@ -69,10 +69,7 @@ pub fn umount(target: &str) -> io::Result<()> {
 pub fn resolve_uuid(uuid: &str) -> io::Result<String> {
 	fs::read_dir("/sys/class/block")?
 		.filter_map(Result::ok)
-		.filter_map(|entry| {
-			let path = dbg!(entry.path().join("uevent"));
-			dbg!(fs::read_to_string(&path).ok())
-		})
+		.filter_map(|entry| fs::read_to_string(entry.path().join("uevent")).ok())
 		.find_map(|contents| {
 			let (mut devname, mut partuuid) = (None, None);
 
@@ -83,7 +80,6 @@ pub fn resolve_uuid(uuid: &str) -> io::Result<String> {
 					partuuid = Some(v.to_string());
 				}
 
-				// 🔁 se já encontrou os dois, não há razão pra continuar
 				if devname.is_some() && partuuid.is_some() {
 					break;
 				}

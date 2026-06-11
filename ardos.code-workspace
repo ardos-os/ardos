@@ -1,0 +1,28 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "packages/ardos-packer"
+		},
+		{
+			"path": "packages/shift"
+		},
+		{
+			"path": "packages/tibs"
+		},
+		{
+			"path": "packages/morula"
+		},
+		{
+			"path": "packages/init-stage-1"
+		},
+		{
+			"path": "packages/easydrm"
+		}
+	],
+	"settings": {
+		"rust-analyzer.checkOnSave": true
+	}
+}

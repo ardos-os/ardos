@@ -3,6 +3,8 @@ build.*/
 
 .direnv
 packages/*/target/
+/target
+Cargo.lock
 *.src.tar.xz
 packages/mesa/*.tar.*
 /packages/spirv-llvm/SPIRV-LLVM-Translator

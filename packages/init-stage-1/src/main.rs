@@ -15,7 +15,7 @@ use crate::{
 };
 
 fn main() -> io::Result<()> {
-	println!("------------------------------ Init stage 1 ------------------------------");
+	println!("init-stage-1: starting");
 	let proc = Proc::new()?;
 	let args = Args::parse(&proc)?;
 
@@ -24,42 +24,16 @@ fn main() -> io::Result<()> {
 	prepare_initramfs_mountpoints()?;
 
 	let system_partition_path = mount_system_partition(&args)?;
-	dbg!(&args, &system_partition_path);
-	ls(&system_partition_path)?;
 
 	let squashfs_path = system_partition_path.join("system.squashfs");
 
-	// cria o loop device (associa o ficheiro -> /dev/loopX) e mantém o objecto vivo
 	let loop_device = Box::leak(Box::new(LoopDevice::new(&squashfs_path)?));
-	println!("Loop device created: {}", loop_device.path().display());
 
-	// monta o loop device em /system
 	let system_root_path = mount_system_image(loop_device.path())?;
-	ls(&system_root_path)?;
 
 	switch_root(system_root_path)?;
-	ls("/")?;
 	prepare_runtime_filesystems()?;
-	launch_shift()
-}
-
-fn ls<P: AsRef<std::path::Path>>(path: P) -> io::Result<()> {
-	let path = path.as_ref();
-	println!("Listing contents of {}", path.display());
-
-	for entry in fs::read_dir(path)? {
-		let entry = entry?;
-		let ty = entry.file_type()?;
-		let kind = if ty.is_dir() {
-			"dir"
-		} else if ty.is_file() {
-			"file"
-		} else {
-			"other"
-		};
-		println!(" - {} ({})", entry.file_name().to_string_lossy(), kind);
-	}
-	Ok(())
+	launch_morula(&args)
 }
 
 fn mount_dev() -> io::Result<()> {
@@ -94,7 +68,6 @@ fn mount_system_image(device: impl Into<PathBuf>) -> io::Result<PathBuf> {
 		"squashfs",
 		MountFlags::RDONLY | MountFlags::NODEV,
 	)?;
-	println!("✅ Mounted {} to {}", device.display(), SYSTEM_PATH);
 	Ok(PathBuf::from(SYSTEM_PATH))
 }
 
@@ -133,37 +106,26 @@ fn ensure_mountpoint(path: &str) -> io::Result<()> {
 	))
 }
 
-fn launch_shift() -> io::Result<()> {
-	const SHIFT_PATH: &str = "/usr/bin/shift";
-	if !std::path::Path::new(SHIFT_PATH).exists() {
+fn launch_morula(args: &Args) -> io::Result<()> {
+	const MORULA_PATH: &str = "/ardos/services/morula/morula";
+	if !std::path::Path::new(MORULA_PATH).is_file() {
 		return Err(io::Error::new(
 			io::ErrorKind::NotFound,
-			format!("{SHIFT_PATH} is missing from the system image"),
+			format!("{MORULA_PATH} is missing from the system image"),
 		));
 	}
 
-	println!("init-stage-1: DRM device nodes before launching Shift");
-	if let Err(err) = ls("/dev/dri") {
-		eprintln!("init-stage-1: failed to list /dev/dri: {err}");
-	}
-	println!("init-stage-1: launching {SHIFT_PATH} as PID 1");
-	let error = Command::new(SHIFT_PATH)
-		.env("HOME", "/run/")
-		.env("RUST_LOG", "trace")
-        .env("LIBGL_DEBUG", "verbose")
-        .env("EGL_LOG_LEVEL", "debug")
-        .env("MESA_DEBUG", "context")
-        .env("RUST_BACKTRACE", "full")
-		.exec();
-	dbg!(&error);
-	std::thread::sleep(std::time::Duration::from_secs(5));
-	Err(error)
+	println!("init-stage-1: handing PID 1 to Morula");
+	Err(
+		Command::new(MORULA_PATH)
+			.env("MORULA_USER_PARTITION", &args.user_data_partition)
+			.exec(),
+	)
 }
 pub fn switch_root(new_root: impl Into<PathBuf>) -> io::Result<()> {
 	let new_root = new_root.into();
 	println!("switch_root: switching root to {}", new_root.display());
 
-	// 1️⃣ Ensure the new root exists and is accessible
 	if !new_root.exists() {
 		return Err(io::Error::new(
 			io::ErrorKind::NotFound,
@@ -171,7 +133,6 @@ pub fn switch_root(new_root: impl Into<PathBuf>) -> io::Result<()> {
 		));
 	}
 
-	// 2️⃣ Try to move or unmount the usual mountpoints
 	let mounts = ["/dev", "/proc", "/sys", "/run"];
 	for &mnt in mounts.iter() {
 		let new_target = new_root.join(mnt.strip_prefix('/').unwrap_or(mnt));
@@ -194,15 +155,12 @@ pub fn switch_root(new_root: impl Into<PathBuf>) -> io::Result<()> {
 		}
 	}
 
-	// 3️⃣ Change current directory to the new root
 	env::set_current_dir(&new_root)?;
 	println!("switch_root: changed directory to {}", new_root.display());
 
-	// 4️⃣ Move new_root over "/"
 	mount(&new_root.display().to_string(), "/", None, MountFlags::MOVE)?;
 	println!("switch_root: new root mounted over /");
 
-	// 5️⃣ Replace process root (chroot("."))
 	let dot = CString::new(".").unwrap();
 	let res = unsafe { libc::chroot(dot.as_ptr()) };
 	if res != 0 {

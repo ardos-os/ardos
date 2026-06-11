@@ -7,3 +7,6 @@
 [submodule "packages/shift"]
 	path = packages/shift
 	url = https://github.com/ardos-os/shift
+[submodule "packages/easydrm"]
+	path = packages/easydrm
+	url = https://github.com/ardos-os/easydrm

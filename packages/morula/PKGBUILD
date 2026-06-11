@@ -1,0 +1,24 @@
+# Maintainer: Tiago <tiago@ardos.local>
+
+pkgname=morula
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Ardos OS daemon manager"
+arch=('x86_64')
+license=('MIT')
+makedepends=('rust')
+source=()
+sha256sums=()
+
+build() {
+	export CARGO_TARGET_DIR="${BUILDDIR}/cargo-target"
+	cargo build \
+		--manifest-path "${startdir}/Cargo.toml" \
+		--release
+}
+
+package() {
+	install -Dm755 \
+		"${BUILDDIR}/cargo-target/release/morula" \
+		"${pkgdir}/ardos/services/morula/morula"
+}

@@ -343,6 +343,32 @@ path = "packages/skia"
 dockerfile_path = "packages/skia/Dockerfile"
 
 [[package]]
+name = "xkeyboard-config"
+version = "2.47"
+[package.source]
+mode = "binary"
+url = "https://archive.archlinux.org/packages/x/xkeyboard-config/xkeyboard-config-2.47-1-any.pkg.tar.zst"
+sha256 = "49BEC4F38E23A74AC71EB37EE4AED49C113726B44A432F0211EFC93909EE1254"
+
+[[package]]
+name = "libxkbcommon"
+version = "1.13.2"
+build_deps = ["xkeyboard-config"]
+[package.source]
+mode = "binary"
+url = "https://archive.archlinux.org/packages/l/libxkbcommon/libxkbcommon-1.13.2-1-x86_64.pkg.tar.zst"
+sha256 = "18D8DC90958EDA2EDAAB9B671EE96C2C1F2B1A322618ECA97C7C04605D738581"
+
+[[package]]
+name = "morula"
+version = "0.1.0"
+[package.source]
+mode = "pkgbuildlocal"
+path = "packages/morula"
+[package.docker]
+dockerfile_path ="packages/morula/Dockerfile"
+
+[[package]]
 name = "shift"
 version = "0.1.0_alpha"
 build_deps = [
@@ -361,11 +387,23 @@ build_deps = [
   "skia",
   "libinput-minimal",
 ]
+cargo_workspaces = ["packages/easydrm"]
 [package.source]
 mode = "pkgbuildlocal"
 path = "packages/shift"
 [package.docker]
 dockerfile_path = "packages/shift/Dockerfile"
+
+[[package]]
+name = "tibs"
+version = "0.1.0_alpha"
+build_deps = ["mesa", "libxkbcommon"]
+cargo_workspaces = ["packages/shift"]
+[package.source]
+mode = "pkgbuildlocal"
+path = "packages/tibs"
+[package.docker]
+dockerfile_path = "packages/tibs/Dockerfile"
 
 [[package]]
 name = "libglvnd"
@@ -374,4 +412,3 @@ build_deps = ["mesa", "llvm-mesa"]
 [package.source]
 mode = "pkgbuildlocal"
 path = "packages/libglvnd"
-

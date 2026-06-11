@@ -56,6 +56,9 @@ rm  "$SYSROOT"/usr/bin/{brotli,bzip2,bzip2recover,bzdiff,bzgrep,bzmore} -f
 rm  "$SYSROOT"/usr/bin/{png-fix-itxt,png2pnm,pngfix,pnm2png,libpng16-config} -f
 rm  "$SYSROOT"/usr/bin/{fc-cache,fc-cat,fc-conflist,fc-list,fc-match,fc-pattern,fc-query,fc-scan,fc-validate} -f
 rm  "$SYSROOT"/usr/bin/{libevdev-tweak-device,libwacom-list-devices,libwacom-list-local-devices,libwacom-show-stylus,libwacom-update-db,mouse-dpi-tool,mtdev-test,touchpad-edge-detector} -f
+rm  "$SYSROOT"/usr/bin/xkbcli -f
+rm  "$SYSROOT"/usr/lib/libxkbregistry.so* -f
+rm  "$SYSROOT"/usr/lib/xkbcommon -rf
 rm  "$SYSROOT"/usr/bin/{gi-decompile-typelib,gi-inspect-typelib,gio-querymodules,glib-gettextize,gobject-query} -f
 rm  "$SYSROOT"/usr/bin/{di-edid-decode,gencat,getconf,getent,iconv,iconvconfig,ldd,locale,localedef,makedb,pcprofiledump,sotruss,sprof,xmlwf,pcre2-config} -f
 rm  "$SYSROOT"/usr/bin/{mesa-overlay-control.py,mesa-screenshot-control.py,spirv2dxil} -f
