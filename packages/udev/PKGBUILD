@@ -28,6 +28,7 @@ build() {
     cd "$srcdir/systemd-$pkgver"
 
     rm -rf build
+    CFLAGS+=" -Wno-error=override-init"
     meson setup build . \
         --prefix=/usr \
         --buildtype=release \

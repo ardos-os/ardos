@@ -143,8 +143,6 @@ jobs:
         with:
           submodules: recursive
 
-      - run: sudo chmod 777 . -R
-
       - name: Download build dir (ardos-packer)
         uses: actions/download-artifact@v4
         with:
@@ -157,7 +155,13 @@ jobs:
           path: ${{ env.BUILD_DIR }}
           restore-keys: |
             build-image-${{ runner.os }}-
-          key: build-image-${{ runner.os }}-${{ hashFiles('**/manifest.toml', '**/sysroot/**') }}
+          key: build-image-${{ runner.os }}-${{ hashFiles('manifest.toml', 'packages/**/PKGBUILD', 'scripts/**') }}
+
+      - name: Normalize restored build permissions
+        run: |
+          mkdir -p build
+          sudo chown -R "$(id -u):$(id -g)" build
+          chmod -R u+rwX build
 
       - name: Delete old images
         run: rm -rf build/images
@@ -165,7 +169,7 @@ jobs:
       - name: Build system image
         run: |
           chmod +x ./build-ardos/ardos-packer
-          ./build-ardos/ardos-packer image assemble
+          sudo ./build-ardos/ardos-packer image assemble
 
       - name: Delete ardos-packer
         run: rm -f build/ardos-packer
@@ -178,7 +182,9 @@ jobs:
           path: build/images/*.squashfs
 
       - name: Fix build dir permissions
-        run: sudo chown $(whoami):$(whoami) build/ -R
+        run: |
+          sudo chown -R "$(id -u):$(id -g)" build
+          chmod -R u+rwX build
         if: always()
 
       - name: Upload build dir (image)
@@ -192,7 +198,7 @@ jobs:
         if: always()
         uses: actions/cache/save@v4
         with:
-          key: build-image-${{ runner.os }}-${{ hashFiles('**/manifest.toml', '**/sysroot/**') }}
+          key: build-image-${{ runner.os }}-${{ hashFiles('manifest.toml', 'packages/**/PKGBUILD', 'scripts/**') }}
           path: ${{ env.BUILD_DIR }}
 
   merge-build-dir:
