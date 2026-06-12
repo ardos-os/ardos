@@ -7,6 +7,8 @@ edition = "2024"
 anyhow = "1.0"
 glow = "0.14"
 tab-app-framework = { version = "0.1.0-alpha", git = "https://github.com/ardos-os/shift" }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
 
 [profile.release]
 lto = true
