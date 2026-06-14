@@ -1,6 +1,0 @@
-[patch."https://github.com/ardos-os/shift"]
-tab-app-framework = {path = "./packages/shift/app-framework"}
-[patch."https://github.com/ardos-os/easydrm"]
-easydrm = {path = "./packages/easydrm"}
-[patch."https://github.com/coffeeispower/rust-skia"]
-skia-safe = { version = "=0.91.0" }

@@ -1,0 +1,15 @@
+[package]
+name = "registrym"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]
+registrym-protocol = { path = "../protocol" }
+postcard = { version = "1.0", default-features = false }
+serde = { git = "https://github.com/coffeeispower/serde", default-features = false, features = ["derive"] }
+
+[lints.rust]
+unexpected_cfgs = { level = "allow" }

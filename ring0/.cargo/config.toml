@@ -1,0 +1,5 @@
+[patch.crates-io]
+serde = {git = "https://github.com/coffeeispower/serde"}
+serde_core = {git = "https://github.com/coffeeispower/serde"}
+serde_derive = {git = "https://github.com/coffeeispower/serde"}
+postcard = {git = "https://github.com/coffeeispower/postcard"}
