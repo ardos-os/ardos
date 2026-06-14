@@ -1,5 +1,5 @@
-[submodule "packages/ardos-packer"]
-	path = packages/ardos-packer
+[submodule "build-tools/ardos-packer"]
+	path = build-tools/ardos-packer
 	url = https://github.com/ardos-os/ardos-packer
 [submodule "packages/glibc"]
 	path = packages/glibc
