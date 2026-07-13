@@ -1,0 +1,32 @@
+name: build-packages
+
+on:
+  push:
+
+jobs:
+  build-heavy:
+    name: Build llvm-mesa
+    runs-on: blacksmith-32vcpu-ubuntu-2404
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+            extra-substituters = https://ardos-os.cachix.org
+            extra-trusted-public-keys = ardos-os.cachix.org-1:ER39Zub8rFCCCdjZ7VUG+654TvPFkH8fvk2Iofzt74s=
+            experimental-features = nix-command flakes
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v15
+        with:
+          name: ardos-os
+          authToken: '${{ secrets.CACHIX_TOKEN }}'
+
+      - name: Build mesa
+        run: nix build .#shift --max-jobs 32 --show-trace --print-build-logs
+
+        

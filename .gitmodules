@@ -1,0 +1,3 @@
+[submodule "modules/shift"]
+	path = modules/shift
+	url = https://github.com/ardos-os/shift
