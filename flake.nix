@@ -24,18 +24,29 @@
     # accessing e.g. self.mesa or self.freetype2.
     loadPackages = instance: let
       pkgDir = ./packages;
-      entries = builtins.readDir pkgDir;
-      pkgFiles = lib.filterAttrs (name: type:
-        type == "regular" && lib.hasSuffix ".nix" name && name != "default.nix"
-      ) entries;
-      pkgNames = builtins.attrNames pkgFiles;
 
+      # Recursively find all .nix files under pkgDir.
+      findPkgs = dir:
+        let entries = builtins.readDir dir; in
+        lib.concatMap (name:
+          let
+            path = dir + "/${name}";
+            type = entries.${name};
+          in
+          if type == "regular" && lib.hasSuffix ".nix" name && name != "default.nix"
+          then [ path ]
+          else if type == "directory"
+          then findPkgs path
+          else []
+        ) (builtins.attrNames entries);
+
+      pkgFiles = findPkgs pkgDir;
       callPackage = instance.callPackage;
 
-      allPackages = builtins.listToAttrs (map (name: {
-        name = lib.removeSuffix ".nix" name;
-        value = callPackage (pkgDir + "/${name}") { inherit self; };
-      }) pkgNames);
+      allPackages = builtins.listToAttrs (map (path: {
+        name = lib.removeSuffix ".nix" (builtins.baseNameOf path);
+        value = callPackage path { inherit self; };
+      }) pkgFiles);
 
       self = allPackages;
     in

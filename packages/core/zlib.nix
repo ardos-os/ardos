@@ -11,8 +11,13 @@ mkArdosDerivation {
     python3
   ];
   postInstall = ''
-    rm -rf $out/share $out/lib/*.so
+    rm -rf $out/share $out/lib/*.la
   '';
+
+  runtimeLayout = [
+    { source = "lib/"; target = "/ardos/core/"; }
+    { source = "lib/pkgconfig/"; target = "/dev/null"; }
+  ];
 
   enableParallelBuilding = true;
   configurePlatforms = [ ];
