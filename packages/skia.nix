@@ -17,7 +17,7 @@ mkArdosDerivation {
   src = fetchgit {
     url = "https://github.com/rust-skia/skia.git";
     rev = skiaCommit;
-    hash = "sha256-wDbQ6JkV3Kahz/WsOTE6mLpI4cPfKKy8a3IpQ3b1uDY="; # FILLME
+    hash = "sha256-wDbQ6JkV3Kahz/WsOTE6mLpI4cPfKKy8a3IpQ3b1uDY=";
   };
 
   nativeBuildInputs = with ap2.crossPkgs.pkgsBuildTarget; [
@@ -78,7 +78,7 @@ mkArdosDerivation {
 
     # Libraries
     mkdir -p $out/lib
-    cp *.so *.a *.dylib $out/lib
+    cp *.so *.a $out/lib
 
     # Includes
     pushd ../../include

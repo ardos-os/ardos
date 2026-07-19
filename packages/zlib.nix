@@ -29,8 +29,4 @@ mkArdosDerivation {
     "--libdir=${placeholder "out"}/lib"
   ];
   setOutputFlags = false;
-  runtimeLayout = [
-    { source = "lib/"; target = "/ardos/core/"; }
-    { source = "lib/pkgconfig/"; target = "/dev/null"; }
-  ];
 }

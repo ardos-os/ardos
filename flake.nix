@@ -42,11 +42,17 @@
       allPackages;
 
     mkSystem = buildSystem: let
+      systemToTarget = {
+        "x86_64-linux"  = ap2.platforms.x86_64;
+        "aarch64-linux" = ap2.platforms.aarch64;
+      };
+      targetPlatform = systemToTarget.${buildSystem}
+        or (throw "mkSystem: unsupported build system ${buildSystem}");
+
       instance = ap2.init {
         inherit buildSystem;
+        inherit targetPlatform;
         inherit (inputs) nixpkgs crane;
-
-        targetPlatform = ap2.platforms.x86_64;
         toolchainConfig = {
           glibc.runtimePrefix = "/ardos";
         };
