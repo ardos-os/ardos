@@ -173,7 +173,7 @@ let
   armGalliumDrivers = [ "freedreno" "panfrost" ];
 
   galliumDrivers = commonGalliumDrivers ++ lib.optionals (ap2.crossPkgs.stdenv.targetPlatform.isAarch64) armGalliumDrivers;
-  driversPrefix = "ardos/graphics/drivers";
+  driversPrefix = "/ardos/graphics/drivers";
   mesaRelPref = "ardos/graphics/drivers/mesa";
   mesaPrefix = "/"+mesaRelPref;
 in
