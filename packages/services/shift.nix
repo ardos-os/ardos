@@ -9,7 +9,7 @@ ap2.buildArdosRustPackage {
   pname = "shift";
   version = "0.1.0-alpha";
 
-  src = ../modules/shift;
+  src = ../../modules/shift;
 
   cargoExtraArgs = "-p shift";
 
