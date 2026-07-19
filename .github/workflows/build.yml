@@ -41,12 +41,14 @@ jobs:
           name: ardos-os
           authToken: '${{ secrets.CACHIX_TOKEN }}'
 
-      - name: Build ROM
-        run: nix build ".#packages.${{ matrix.nix-system }}.rom" --max-jobs ${{ matrix.max-jobs }} --show-trace --print-build-logs
+      - name: Build Ardos OS Virtual Machine
+        run: nix build ".#packages.${{ matrix.nix-system }}.vm" --max-jobs ${{ matrix.max-jobs }} --show-trace --print-build-logs
+      - name: Export ROM link
+        run: nix build ".#packages.${{ matrix.nix-system }}.rom" --max-jobs ${{ matrix.max-jobs }} --show-trace --print-build-logs --out-link rom
 
       - name: Upload ROM
         uses: actions/upload-artifact@v4
         with:
           name: ardos-rom-${{ matrix.arch }}
-          path: result
+          path: rom
           retention-days: 14
