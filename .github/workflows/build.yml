@@ -1,15 +1,34 @@
-name: build-packages
+name: Build ROM
 
 on:
   push:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.arch }}
+  cancel-in-progress: true
 
 jobs:
-  build-heavy:
-    name: Build llvm-mesa
-    runs-on: blacksmith-32vcpu-ubuntu-2404
+  build:
+    name: ROM (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            nix-system: x86_64-linux
+            runner: blacksmith-32vcpu-ubuntu-2404
+            max-jobs: 32
+          - arch: aarch64
+            nix-system: aarch64-linux
+            runner: blacksmith-32vcpu-ubuntu-2404
+            max-jobs: 16
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Install Nix
         uses: cachix/install-nix-action@v31
@@ -26,7 +45,12 @@ jobs:
           name: ardos-os
           authToken: '${{ secrets.CACHIX_TOKEN }}'
 
-      - name: Build mesa
-        run: nix build .#shift --max-jobs 32 --show-trace --print-build-logs
+      - name: Build ROM
+        run: nix build ".#packages.${{ matrix.nix-system }}.rom" --max-jobs ${{ matrix.max-jobs }} --show-trace --print-build-logs
 
-        
+      - name: Upload ROM
+        uses: actions/upload-artifact@v4
+        with:
+          name: ardos-rom-${{ matrix.arch }}
+          path: result
+          retention-days: 14
