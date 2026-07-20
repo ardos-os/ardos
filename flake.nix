@@ -93,15 +93,10 @@
         })
       ];
 
-      # System assembly
-      ardosKernel = instance.kernel {
-        version = "7.2-rc1";
-        src = instance.buildPkgs.fetchurl {
-          url = "https://git.kernel.org/torvalds/t/linux-7.2-rc1.tar.gz";
-          hash = "sha256-tGDnTPoKQoQWiBBjgh72quimpMaYkbmrEPz07fdwzg0=";
-        };
-        configFile = ./kernel/.config;
-      };
+      # System assembly.
+      # The kernel is built by packages/core/kernel.nix so that other packages
+      # (e.g. kernel modules built with cargo-nok) can reference it via self.kernel.
+      ardosKernel = packages.kernel;
 
       ardosInitrd = instance.initrd.fromRustBinary ./initrd;
 

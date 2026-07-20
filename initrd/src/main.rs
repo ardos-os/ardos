@@ -107,7 +107,7 @@ fn ensure_mountpoint(path: &str) -> io::Result<()> {
 }
 
 fn launch_morula(args: &Args) -> io::Result<()> {
-	const MORULA_PATH: &str = "/ardos/services/morula/morula";
+	const MORULA_PATH: &str = "/ardos/init/morula";
 	if !std::path::Path::new(MORULA_PATH).is_file() {
 		return Err(io::Error::new(
 			io::ErrorKind::NotFound,

@@ -1,3 +1,9 @@
 [submodule "modules/shift"]
 	path = modules/shift
 	url = https://github.com/ardos-os/shift
+[submodule "modules/motherboard"]
+	path = modules/motherboard
+	url = https://github.com/ardos-os/motherboard
+[submodule "modules/cargo-nok"]
+	path = modules/cargo-nok
+	url = https://github.com/ardos-os/cargo-nok
