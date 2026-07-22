@@ -10,6 +10,6 @@ ap2.kernel {
   };
   configFile = writeText ".config" ((builtins.readFile ../../kernel/.config)+''
     CONFIG_EARLY_BOOT_LOGO=y
-    CONFIG_EARLY_BOOT_LOGO_FILE=${./ardosos.bmp}
+    CONFIG_EARLY_BOOT_LOGO_FILE="${./ardosos.bmp}"
   '');
 }
