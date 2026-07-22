@@ -6,11 +6,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1784668539,
-        "narHash": "sha256-dj0rlv54u6RLAXrWLxlUCAO6Wl/JeiCR4GcUd16iEJM=",
+        "lastModified": 1784813363,
+        "narHash": "sha256-x9K5MFyVYF8KU0cFG956en45u4iSDvtDJXPM2jQJ+cc=",
         "owner": "ardos-os",
         "repo": "ardos-packer2",
-        "rev": "e6604452d8a4c3dbd87e0cda8c8f004a9db63b85",
+        "rev": "0cb8bdd5a254869130ce11d34bc806fbe2bbc6ee",
         "type": "github"
       },
       "original": {
