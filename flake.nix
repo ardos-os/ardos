@@ -88,6 +88,7 @@
         skia
         shift
         motherboardm
+        morula
         (instance.wrapDerivation instance.crossPkgs.hwdata {
           runtimeLayout = [
             {
@@ -108,6 +109,7 @@
       ardosSysroot = instance.sysroot {
         name = "ardos-os";
         includePackages = romPackages;
+        ensureFolders = ["tmp" "run" "proc" "sys" "dev"];
       };
 
       ardosRom = instance.rom {

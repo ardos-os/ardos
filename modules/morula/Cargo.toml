@@ -1,0 +1,11 @@
+[package]
+name = "morula"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+syscalls = { version = "0.8.1", features = ["x86_64", "aarch64"] }
+motherboard-client = {git = "https://github.com/ardos-os/motherboard"}
+motherboardm-protocol = {git = "https://github.com/ardos-os/motherboard"}
+[build-dependencies]
+midl = {git = "https://github.com/ardos-os/motherboard" }

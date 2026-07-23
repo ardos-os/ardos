@@ -4,7 +4,7 @@ mod mount;
 mod proc;
 
 use std::{
-	env, ffi::CString, fs, io, os::unix::process::CommandExt, path::PathBuf, process::Command,
+	env, ffi::CString, fs, io, os::unix::process::CommandExt, path::PathBuf, process::Command, time::Duration,
 };
 
 use crate::{
@@ -21,7 +21,6 @@ fn main() -> io::Result<()> {
 
 	mount_dev()?;
 	mount_sys()?;
-	prepare_initramfs_mountpoints()?;
 
 	let system_partition_path = mount_system_partition(&args)?;
 
@@ -33,7 +32,9 @@ fn main() -> io::Result<()> {
 
 	switch_root(system_root_path)?;
 	prepare_runtime_filesystems()?;
-	launch_morula(&args)
+	dbg!(launch_morula(&args));
+	std::thread::park();
+	Ok(())
 }
 
 fn mount_dev() -> io::Result<()> {
@@ -44,10 +45,6 @@ fn mount_dev() -> io::Result<()> {
 fn mount_sys() -> io::Result<()> {
 	fs::create_dir_all("/sys")?;
 	mount("sysfs", "/sys", "sysfs", MountFlags::empty())
-}
-
-fn prepare_initramfs_mountpoints() -> io::Result<()> {
-	fs::create_dir_all("/run")
 }
 
 fn mount_system_partition(args: &Args) -> io::Result<PathBuf> {
@@ -79,7 +76,6 @@ fn prepare_runtime_filesystems() -> io::Result<()> {
 		"tmpfs",
 		MountFlags::NOSUID | MountFlags::NODEV,
 	)?;
-	fs::create_dir_all("/run/udev")?;
 
 	ensure_mountpoint("/tmp")?;
 	mount(
@@ -116,6 +112,7 @@ fn launch_morula(args: &Args) -> io::Result<()> {
 	}
 
 	println!("init-stage-1: handing PID 1 to Morula");
+	
 	Err(
 		Command::new(MORULA_PATH)
 			.env("MORULA_USER_PARTITION", &args.user_data_partition)
@@ -133,7 +130,7 @@ pub fn switch_root(new_root: impl Into<PathBuf>) -> io::Result<()> {
 		));
 	}
 
-	let mounts = ["/dev", "/proc", "/sys", "/run"];
+	let mounts = ["/dev", "/proc", "/sys"];
 	for &mnt in mounts.iter() {
 		let new_target = new_root.join(mnt.strip_prefix('/').unwrap_or(mnt));
 
@@ -156,6 +153,7 @@ pub fn switch_root(new_root: impl Into<PathBuf>) -> io::Result<()> {
 	}
 
 	env::set_current_dir(&new_root)?;
+	
 	println!("switch_root: changed directory to {}", new_root.display());
 
 	mount(&new_root.display().to_string(), "/", None, MountFlags::MOVE)?;

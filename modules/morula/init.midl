@@ -1,0 +1,6 @@
+service Init {
+    store totalComponents: string[],
+    store startingComponents: string[];
+    store startedComponents: string[];
+    store logs: string[];
+}
