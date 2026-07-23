@@ -1,37 +1,39 @@
-{ mkArdosDerivation, ap2, self }:
+{ mkArdosDerivation, ap2, self, craneLib, wrapDerivation }:
 
 let
   kernelModules = import ../../kernel/modules.nix {
     inherit (ap2) buildPkgs;
-    kernel = self.linux-headers;
+    kernel = self.kernel.headers;
     cargo-nok = self.cargo-nok;
+    inherit craneLib;
   };
 
-  # Vendor all dependencies including the git-patched serde_core so
-  # `cargo nok build` can resolve crates offline in the sandbox.
-  vendoredDeps = kernelModules.vendorDependencies {
+  drv = kernelModules.mkKernelModule {
+    name = "motherboardm";
+
     src = ../../modules/motherboard;
-    manifestPath = "motherboardm/Cargo.toml";
-  };
-in
-kernelModules.mkKernelModule {
-  name = "motherboardm";
+    sourceRoot = "motherboard";
 
-  src = ../../modules/motherboard;
-  sourceRoot = ".";
+    # Vendor deps from motherboardm's own Cargo.lock (includes the git-patched
+    # serde_core source).  crane reads the lock file, fetches all crates.io and
+    # git dependencies, and produces a vendored directory with absolute store
+    # paths — no manual vendoring or [patch.crates-io] stripping required.
+    cargoLock = ../../modules/motherboard/motherboardm/Cargo.lock;
 
-  # motherboardm is excluded from the workspace and lives in a subdirectory.
-  # The protocol crate is a path dependency at ../protocol, which is already
-  # present in the source tree.
-  cargoExtraArgs = "";
+    preBuild = ''
+      cd motherboardm
+    '';
 
-  vendorDependencies = vendoredDeps;
-
-  passthru = {
-    # Expose the .ko for loading from initrd or other system components.
-    meta = {
-      description = "motherboardm kernel-backed service bus for Linux IPC";
-      license = ap2.buildPkgs.lib.licenses.gpl2Only;
+    passthru = {
+      meta = {
+        description = "motherboardm kernel-backed service bus for Linux IPC";
+        license = ap2.buildPkgs.lib.licenses.gpl2Only;
+      };
     };
   };
+in
+wrapDerivation drv {
+  runtimeLayout = [
+    { source = "./"; target = "/kernel/modules/"; }
+  ];
 }

@@ -85,7 +85,8 @@
         mesa
         glib
         skia
-        packages.shift
+        shift
+        motherboardm
         (instance.wrapDerivation instance.crossPkgs.hwdata {
           runtimeLayout = [
             { source = "share/hwdata/"; target = "/ardos/graphics/hwdata/"; }
