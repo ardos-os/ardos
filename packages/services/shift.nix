@@ -28,8 +28,6 @@ in
         ninja
       ])
       ++ (with ap2.buildPkgs; [
-        cargo
-        rustc
         python3
       ]);
 
