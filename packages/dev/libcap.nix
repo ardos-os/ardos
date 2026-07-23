@@ -1,5 +1,9 @@
-{ mkArdosDerivation, ap2, self, fetchurl }:
-
+{
+  mkArdosDerivation,
+  ap2,
+  self,
+  fetchurl,
+}:
 mkArdosDerivation {
   pname = "libcap";
   version = "2.71";
@@ -7,7 +11,7 @@ mkArdosDerivation {
     url = "https://git.kernel.org/pub/scm/libs/libcap/libcap.git/snapshot/libcap-2.71.tar.gz";
     sha256 = "sha256-Y9DHxo/WAUF/5IU0hxXvQaTt8LLpAmk13St+/Gjh31k=";
   };
-  nativeBuildInputs = [ ap2.crossPkgs.pkgsBuildTarget.patchelf ];
+  nativeBuildInputs = [ap2.crossPkgs.pkgsBuildTarget.patchelf];
 
   # libcap has a non-standard build system; manual phases required.
   configurePhase = "runHook preConfigure; runHook postConfigure";
@@ -44,8 +48,17 @@ mkArdosDerivation {
   '';
 
   runtimeLayout = [
-    { source = "lib/"; target = "/ardos/core/"; }
-    { source = "lib64/"; target = "/ardos/core/"; }
-    { source = "lib/pkgconfig/"; target = "/dev/null"; }
+    {
+      source = "lib/";
+      target = "/ardos/core/";
+    }
+    {
+      source = "lib64/";
+      target = "/ardos/core/";
+    }
+    {
+      source = "lib/pkgconfig/";
+      target = "/dev/null";
+    }
   ];
 }

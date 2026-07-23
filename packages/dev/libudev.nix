@@ -1,5 +1,8 @@
-{ mkArdosDerivation, self, ap2 }:
-
+{
+  mkArdosDerivation,
+  self,
+  ap2,
+}:
 mkArdosDerivation {
   pname = "libudev-zero";
   version = "1.0.3";
@@ -8,7 +11,7 @@ mkArdosDerivation {
     sha256 = "19bxny0gnsnnhjs86ah9pbl81vcgzwkdfzkcircikl32gmjrpn0b";
   };
 
-  buildInputs = [ self.linux-headers ];
+  buildInputs = [self.linux-headers];
 
   makeFlags = [
     "PREFIX=$(out)"
@@ -22,10 +25,16 @@ mkArdosDerivation {
     )
   '';
 
-  installTargets = [ "install-shared" "install-headers" "install-pkgconfig" ];
+  installTargets = ["install-shared" "install-headers" "install-pkgconfig"];
 
   runtimeLayout = [
-    { source = "lib/"; target = "/ardos/core/"; }
-    { source = "lib64/"; target = "/ardos/core/"; }
+    {
+      source = "lib/";
+      target = "/ardos/core/";
+    }
+    {
+      source = "lib64/";
+      target = "/ardos/core/";
+    }
   ];
 }

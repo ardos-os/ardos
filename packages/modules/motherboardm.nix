@@ -1,6 +1,10 @@
-{ mkArdosDerivation, ap2, self, craneLib, wrapDerivation }:
-
-let
+{
+  mkArdosDerivation,
+  ap2,
+  self,
+  craneLib,
+  wrapDerivation,
+}: let
   kernelModules = import ../../kernel/modules.nix {
     inherit (ap2) buildPkgs;
     kernel = self.kernel.headers;
@@ -32,8 +36,11 @@ let
     };
   };
 in
-wrapDerivation drv {
-  runtimeLayout = [
-    { source = "./"; target = "/kernel/modules/"; }
-  ];
-}
+  wrapDerivation drv {
+    runtimeLayout = [
+      {
+        source = "./";
+        target = "/kernel/modules/";
+      }
+    ];
+  }

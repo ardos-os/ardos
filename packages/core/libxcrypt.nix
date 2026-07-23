@@ -1,5 +1,9 @@
-{ mkArdosDerivation, ap2, fetchurl, self }:
-
+{
+  mkArdosDerivation,
+  ap2,
+  fetchurl,
+  self,
+}:
 mkArdosDerivation {
   pname = "libxcrypt";
   version = "4.5.2";
@@ -8,7 +12,7 @@ mkArdosDerivation {
     sha256 = "sha256-cVE6McAaQovM1TZ6Mv2V8RXW2sUPtbYMd51ceUKuwHE=";
   };
 
-  nativeBuildInputs = with ap2.crossPkgs.pkgsBuildTarget; [ perl pkg-config ];
+  nativeBuildInputs = with ap2.crossPkgs.pkgsBuildTarget; [perl pkg-config];
 
   configureFlags = [
     "--enable-hashes=strong"

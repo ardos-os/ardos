@@ -1,8 +1,9 @@
-{ mkArdosDerivation, ap2, self }:
-
-with self;
-
-let
+{
+  mkArdosDerivation,
+  ap2,
+  self,
+}:
+with self; let
   # 1. Set datadir_amdgpu to the runtime path so the binary gets compiled
   #    with /ardos/graphics/libdrm/amdgpu.ids hardcoded.
   # 2. Patch data/meson.build to install to a relative path (share/libdrm)
@@ -33,40 +34,51 @@ let
      endif
   '';
 in
+  mkArdosDerivation {
+    pname = "libdrm";
+    version = "2.4.131";
+    src = builtins.fetchurl {
+      url = "https://dri.freedesktop.org/libdrm/libdrm-2.4.131.tar.xz";
+      sha256 = "1m8pyv2l7mbkf1wy54b3dsvm7f8ksf0xwm6nlc36928wnn1rkfj5";
+    };
 
-mkArdosDerivation {
-  pname = "libdrm";
-  version = "2.4.131";
-  src = builtins.fetchurl {
-    url = "https://dri.freedesktop.org/libdrm/libdrm-2.4.131.tar.xz";
-    sha256 = "1m8pyv2l7mbkf1wy54b3dsvm7f8ksf0xwm6nlc36928wnn1rkfj5";
-  };
+    patches = [amdgpuDatadirPatch];
 
-  patches = [ amdgpuDatadirPatch ];
+    nativeBuildInputs = with ap2.crossPkgs.pkgsBuildTarget; [meson ninja pkg-config];
+    buildInputs = [libpciaccess];
 
-  nativeBuildInputs = with ap2.crossPkgs.pkgsBuildTarget; [ meson ninja pkg-config ];
-  buildInputs = [ libpciaccess ];
+    mesonFlags = [
+      "-Dudev=false"
+      "-Detnaviv=disabled"
+      "-Dfreedreno=disabled"
+      "-Dman-pages=disabled"
+      "-Dvc4=disabled"
+      "-Dinstall-test-programs=false"
+      "-Dcairo-tests=disabled"
+      "-Dvalgrind=disabled"
+    ];
 
-  mesonFlags = [
-    "-Dudev=false"
-    "-Detnaviv=disabled"
-    "-Dfreedreno=disabled"
-    "-Dman-pages=disabled"
-    "-Dvc4=disabled"
-    "-Dinstall-test-programs=false"
-    "-Dcairo-tests=disabled"
-    "-Dvalgrind=disabled"
-  ];
+    postInstall = ''
+      rm -rf $out/lib/*.a
+      rm -rf $out/share/man $out/share/doc
+    '';
 
-  postInstall = ''
-    rm -rf $out/lib/*.a
-    rm -rf $out/share/man $out/share/doc
-  '';
-
-  runtimeLayout = [
-    { source = "lib/"; target = "/ardos/core/"; }
-    { source = "lib64/"; target = "/ardos/core/"; }
-    { source = "lib/pkgconfig/"; target = "/dev/null"; }
-    { source = "share/libdrm/"; target = "/ardos/graphics/libdrm/"; }
-  ];
-}
+    runtimeLayout = [
+      {
+        source = "lib/";
+        target = "/ardos/core/";
+      }
+      {
+        source = "lib64/";
+        target = "/ardos/core/";
+      }
+      {
+        source = "lib/pkgconfig/";
+        target = "/dev/null";
+      }
+      {
+        source = "share/libdrm/";
+        target = "/ardos/graphics/libdrm/";
+      }
+    ];
+  }

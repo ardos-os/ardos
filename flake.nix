@@ -10,10 +10,9 @@
     self.submodules = true;
   };
 
-  outputs = inputs:
-  let
+  outputs = inputs: let
     lib = inputs.nixpkgs.lib;
-    systems = [ "x86_64-linux" "aarch64-linux" ];
+    systems = ["x86_64-linux" "aarch64-linux"];
     forAllSystems = lib.genAttrs systems;
 
     ap2 = inputs.ap2.lib;
@@ -26,27 +25,29 @@
       pkgDir = ./packages;
 
       # Recursively find all .nix files under pkgDir.
-      findPkgs = dir:
-        let entries = builtins.readDir dir; in
-        lib.concatMap (name:
-          let
+      findPkgs = dir: let
+        entries = builtins.readDir dir;
+      in
+        lib.concatMap (
+          name: let
             path = dir + "/${name}";
             type = entries.${name};
           in
-          if type == "regular" && lib.hasSuffix ".nix" name && name != "default.nix"
-          then [ path ]
-          else if type == "directory"
-          then findPkgs path
-          else []
+            if type == "regular" && lib.hasSuffix ".nix" name && name != "default.nix"
+            then [path]
+            else if type == "directory"
+            then findPkgs path
+            else []
         ) (builtins.attrNames entries);
 
       pkgFiles = findPkgs pkgDir;
       callPackage = instance.callPackage;
 
       allPackages = builtins.listToAttrs (map (path: {
-        name = lib.removeSuffix ".nix" (builtins.baseNameOf path);
-        value = callPackage path { inherit self; };
-      }) pkgFiles);
+          name = lib.removeSuffix ".nix" (builtins.baseNameOf path);
+          value = callPackage path {inherit self;};
+        })
+        pkgFiles);
 
       self = allPackages;
     in
@@ -54,7 +55,7 @@
 
     mkSystem = buildSystem: let
       systemToTarget = {
-        "x86_64-linux"  = ap2.platforms.x86_64;
+        "x86_64-linux" = ap2.platforms.x86_64;
         "aarch64-linux" = ap2.platforms.aarch64;
       };
       targetPlatform = systemToTarget.${buildSystem}
@@ -89,7 +90,10 @@
         motherboardm
         (instance.wrapDerivation instance.crossPkgs.hwdata {
           runtimeLayout = [
-            { source = "share/hwdata/"; target = "/ardos/graphics/hwdata/"; }
+            {
+              source = "share/hwdata/";
+              target = "/ardos/graphics/hwdata/";
+            }
           ];
         })
       ];
@@ -122,14 +126,16 @@
   in {
     packages = forAllSystems (buildSystem: let
       sys = mkSystem buildSystem;
-    in sys.packages // {
-      kernel = sys.ardosKernel;
-      initrd = sys.ardosInitrd;
-      sysroot = sys.ardosSysroot;
-      rom = sys.ardosRom;
-      vm = sys.vm;
-      default = sys.ardosRom;
-    });
+    in
+      sys.packages
+      // {
+        kernel = sys.ardosKernel;
+        initrd = sys.ardosInitrd;
+        sysroot = sys.ardosSysroot;
+        rom = sys.ardosRom;
+        vm = sys.vm;
+        default = sys.ardosRom;
+      });
 
     checks = forAllSystems (buildSystem: {
       build = (mkSystem buildSystem).ardosRom;
@@ -140,8 +146,8 @@
     in {
       default = sys.instance.buildPkgs.mkShell {
         name = "ardos-os-dev";
-        inputsFrom = [ sys.instance.stdenv ];
-        buildInputs = [ sys.instance.cc ];
+        inputsFrom = [sys.instance.stdenv];
+        buildInputs = [sys.instance.cc];
       };
     });
   };

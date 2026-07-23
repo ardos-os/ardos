@@ -1,9 +1,11 @@
-{ buildPkgs, kernel, cargo-nok, craneLib }:
-
-let
-  inherit (buildPkgs) lib;
-in
 {
+  buildPkgs,
+  kernel,
+  cargo-nok,
+  craneLib,
+}: let
+  inherit (buildPkgs) lib;
+in {
   # Build a Rust Linux kernel module using cargo-nok, backed by crane for
   # dependency vendoring, caching, and offline builds.
   #
@@ -35,20 +37,23 @@ in
     rustc ? buildPkgs.rustc,
     preBuild ? "",
     installPhase ? null,
-    passthru ? { },
-    meta ? { },
-    outputHashes ? { },
-  }:
-    let
-      cc = "${buildPkgs.gcc}/bin/cc";
-      ld = "${buildPkgs.binutils}/bin/ld";
-      objcopy = "${buildPkgs.binutils}/bin/objcopy";
+    passthru ? {},
+    meta ? {},
+    outputHashes ? {},
+  }: let
+    cc = "${buildPkgs.gcc}/bin/cc";
+    ld = "${buildPkgs.binutils}/bin/ld";
+    objcopy = "${buildPkgs.binutils}/bin/objcopy";
 
-      cargoVendorDir = craneLib.vendorCargoDeps (
-        { inherit outputHashes; }
-        // (if cargoLock != null then { inherit cargoLock; } else { inherit src; })
-      );
-    in
+    cargoVendorDir = craneLib.vendorCargoDeps (
+      {inherit outputHashes;}
+      // (
+        if cargoLock != null
+        then {inherit cargoLock;}
+        else {inherit src;}
+      )
+    );
+  in
     craneLib.mkCargoDerivation {
       inherit
         name
@@ -65,10 +70,13 @@ in
 
       buildPhaseCargoCommand = "cargo nok build ${cargoExtraArgs}";
 
-      installPhaseCommand = if installPhase != null then installPhase else ''
-        mkdir -p $out
-        find . -name "*.ko" -exec cp {} $out/ \;
-      '';
+      installPhaseCommand =
+        if installPhase != null
+        then installPhase
+        else ''
+          mkdir -p $out
+          find . -name "*.ko" -exec cp {} $out/ \;
+        '';
 
       nativeBuildInputs = [
         cargo-nok

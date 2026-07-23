@@ -1,5 +1,8 @@
-{ mkArdosDerivation, ap2, self }:
-
+{
+  mkArdosDerivation,
+  ap2,
+  self,
+}:
 mkArdosDerivation {
   pname = "vulkan-loader";
   version = "1.4.304";
@@ -7,7 +10,7 @@ mkArdosDerivation {
     url = "https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/v1.4.304.tar.gz";
     sha256 = "1ycrdic87syda3fkyvkzqqg061g38ifcbz4b0gp4sgsac20q539n";
   };
-  nativeBuildInputs = with ap2.crossPkgs.pkgsBuildTarget; [ cmake pkg-config python3 ];
+  nativeBuildInputs = with ap2.crossPkgs.pkgsBuildTarget; [cmake pkg-config python3];
   buildInputs = [ap2.crossPkgs.vulkan-headers];
   cmakeFlags = [
     "-DBUILD_WSI_XCB_SUPPORT=OFF"
@@ -21,8 +24,17 @@ mkArdosDerivation {
   '';
 
   runtimeLayout = [
-    { source = "lib/"; target = "/ardos/core/"; }
-    { source = "lib64/"; target = "/ardos/core/"; }
-    { source = "lib/pkgconfig/"; target = "/dev/null"; }
+    {
+      source = "lib/";
+      target = "/ardos/core/";
+    }
+    {
+      source = "lib64/";
+      target = "/ardos/core/";
+    }
+    {
+      source = "lib/pkgconfig/";
+      target = "/dev/null";
+    }
   ];
 }

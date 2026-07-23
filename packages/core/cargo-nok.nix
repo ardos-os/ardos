@@ -1,5 +1,8 @@
-{ mkArdosDerivation, ap2, self }:
-
+{
+  mkArdosDerivation,
+  ap2,
+  self,
+}:
 ap2.buildPkgs.rustPlatform.buildRustPackage {
   pname = "cargo-nok";
   version = "0.1.1";

@@ -1,3 +1,2 @@
-{ self }:
-
+{self}:
 self.kernel.uapi

@@ -1,5 +1,8 @@
-{ mkArdosDerivation, ap2, self }:
-
+{
+  mkArdosDerivation,
+  ap2,
+  self,
+}:
 mkArdosDerivation {
   pname = "mtdev";
   version = "1.1.5";
@@ -8,8 +11,8 @@ mkArdosDerivation {
     sha256 = "0i6q0kq13bxsigcx2afhrqv7wkwzzlhabjcvnsl5jbw2s7jhdhw7";
   };
 
-  nativeBuildInputs = with ap2.crossPkgs.pkgsBuildTarget; [ autoconf automake libtool pkg-config ];
-  configureFlags = [ "--disable-static" ];
+  nativeBuildInputs = with ap2.crossPkgs.pkgsBuildTarget; [autoconf automake libtool pkg-config];
+  configureFlags = ["--disable-static"];
   preConfigure = "autoreconf -fi";
 
   postInstall = ''
@@ -17,8 +20,17 @@ mkArdosDerivation {
   '';
 
   runtimeLayout = [
-    { source = "lib/"; target = "/ardos/core/"; }
-    { source = "lib64/"; target = "/ardos/core/"; }
-    { source = "lib/pkgconfig/"; target = "/dev/null"; }
+    {
+      source = "lib/";
+      target = "/ardos/core/";
+    }
+    {
+      source = "lib64/";
+      target = "/ardos/core/";
+    }
+    {
+      source = "lib/pkgconfig/";
+      target = "/dev/null";
+    }
   ];
 }
