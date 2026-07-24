@@ -67,7 +67,7 @@ in
       libgudev
       glib.passthru.pcre2.out
       zlib
-    ];
+    ] + " -rpath ${libglvnd}/lib";
 
     preBuild = ''
       # From: https://github.com/NixOS/nixpkgs/blob/1fab95f5190d087e66a3502481e34e15d62090aa/pkgs/applications/networking/browsers/firefox/common.nix#L247-L253
