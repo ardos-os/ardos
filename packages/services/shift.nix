@@ -93,8 +93,8 @@ in
 
     runtimeLayout = [
       {
-        source = "ardos/";
-        target = "/ardos/";
+        source = "bin/shift";
+        target = "/ardos/graphics/shift";
       }
     ];
   }
