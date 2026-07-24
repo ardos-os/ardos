@@ -316,7 +316,7 @@ with self;
           target = mesaPrefix + "/";
         }
         {
-          source = "share/glvnd";
+          source = "share/glvnd/";
           target = "${driversPrefix}/glvnd";
         }
         {
